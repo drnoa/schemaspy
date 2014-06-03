@@ -166,7 +166,7 @@ public class HtmlTablePage extends HtmlFormatter {
         out.write(column.getName());
         out.writeln("</td>");
         out.write(" <td class='detail'>");
-        out.write(column.getType().toLowerCase());
+        out.write(column.getTypeName().toLowerCase());
         out.writeln("</td>");
         out.write(" <td class='detail' align='right'>");
         out.write(column.getDetailedSize());

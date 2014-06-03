@@ -494,7 +494,7 @@ public class Database {
                         String columnName = rs.getString("column_name");
                         TableColumn column = table.getColumn(columnName);
                         if (column != null) {
-                            column.setType(rs.getString("column_type"));
+                            column.setTypeName(rs.getString("column_type"));
                             column.setShortType(getOptionalString(rs, "short_column_type"));
                         }
                     }

@@ -49,8 +49,13 @@ public class DbAnalyzer {
         Map<TableColumn, Table> allPrimaries = new TreeMap<TableColumn, Table>(new Comparator<TableColumn>() {
             public int compare(TableColumn column1, TableColumn column2) {
                 int rc = column1.getName().compareToIgnoreCase(column2.getName());
-                if (rc == 0)
-                    rc = column1.getType().compareToIgnoreCase(column2.getType());
+                if (rc == 0) {
+	                if (column1.getType() != null && column2.getType() != null)
+	                	// type is exact while typeName can be adorned with additional stuff (e.g. MSSQL appends " identity" for auto-inc keys)
+	                	rc = column1.getType().compareTo(column2.getType());
+	                else
+	                    rc = column1.getTypeName().compareToIgnoreCase(column2.getTypeName());
+                }
                 if (rc == 0)
                     rc = column1.getLength() - column2.getLength();
                 return rc;

@@ -134,7 +134,7 @@ public class XmlTableFormatter {
 
         DOMUtil.appendAttribute(columnNode, "id", String.valueOf(column.getId()));
         DOMUtil.appendAttribute(columnNode, "name", column.getName());
-        DOMUtil.appendAttribute(columnNode, "type", column.getType());
+        DOMUtil.appendAttribute(columnNode, "type", column.getTypeName());
         DOMUtil.appendAttribute(columnNode, "size", String.valueOf(column.getLength()));
         DOMUtil.appendAttribute(columnNode, "digits", String.valueOf(column.getDecimalDigits()));
         DOMUtil.appendAttribute(columnNode, "nullable", String.valueOf(column.isNullable()));

@@ -37,8 +37,9 @@ public class TableColumn {
     private final Table table;
     private final String name;
     private final Object id;
-    private       String type;
-    private       String shortType;
+    private       String typeName;
+    private       String shortTypeName;
+    private       Integer type;
     private final int length;
     private final int decimalDigits;
     private final String detailedSize;
@@ -72,7 +73,8 @@ public class TableColumn {
         String tmp = rs.getString("COLUMN_NAME");
         name = tmp == null ? null : tmp.intern();
         tmp = rs.getString("TYPE_NAME");
-        type = tmp == null ? "unknown" : tmp.intern();
+        typeName = tmp == null ? "unknown" : tmp.intern();
+        type = rs.getInt("DATA_TYPE");
 
         decimalDigits = rs.getInt("DECIMAL_DIGITS");
         Number bufLength = (Number)rs.getObject("BUFFER_LENGTH");
@@ -117,7 +119,7 @@ public class TableColumn {
         this.table = table;
         name = colMeta.getName();
         id = colMeta.getId();
-        type = colMeta.getType();
+        typeName = colMeta.getType();
         length = colMeta.getSize();
         decimalDigits = colMeta.getDigits();
         StringBuilder buf = new StringBuilder();
@@ -162,11 +164,24 @@ public class TableColumn {
 
     /**
      * Type of the column.
+     * See {@link DatabaseMetaData#getColumns(String, String, String, String)}'s <code>DATA_TYPE</code>.
+     * @return integer from java.sql.Types or <code>null</code> if not set
+     */
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+    	this.type = type;
+    }
+    
+    /**
+     * Type of the column.
      * See {@link DatabaseMetaData#getColumns(String, String, String, String)}'s <code>TYPE_NAME</code>.
      * @return
      */
-    public String getType() {
-        return type;
+    public String getTypeName() {
+        return typeName;
     }
 
     /**
@@ -174,26 +189,26 @@ public class TableColumn {
      *
      * @param type
      */
-    public void setType(String type) {
-        this.type = type;
+    public void setTypeName(String type) {
+        this.typeName = type;
     }
 
     /**
-     * Abbreviated form of {@link #getType()}
+     * Abbreviated form of {@link #getTypeName()}
      *
      * @return
      */
-    public String getShortType() {
-        return shortType == null ? type : shortType;
+    public String getShortTypeName() {
+        return shortTypeName == null ? typeName : shortTypeName;
     }
 
     /**
-     * Abbreviated form of {@link #setType(String)}
+     * Abbreviated form of {@link #setTypeName(String)}
      *
      * @param shortType
      */
     public void setShortType(String shortType) {
-        this.shortType = shortType;
+        this.shortTypeName = shortType;
     }
 
     /**

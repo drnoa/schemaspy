@@ -328,7 +328,7 @@ public class HtmlColumnsPage extends HtmlFormatter {
         private final Comparator<TableColumn> bySize = new BySizeComparator();
 
         public int compare(TableColumn column1, TableColumn column2) {
-            int rc = column1.getType().compareToIgnoreCase(column2.getType());
+            int rc = column1.getTypeName().compareToIgnoreCase(column2.getTypeName());
             if (rc == 0) {
                 rc = bySize.compare(column1, column2);
             }
