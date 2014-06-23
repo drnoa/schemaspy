@@ -46,7 +46,7 @@ import net.sourceforge.schemaspy.util.Inflection;
 public class DbAnalyzer {
     public static List<ImpliedForeignKeyConstraint> getImpliedConstraints(Collection<Table> tables) {
         List<TableColumn> columnsWithoutParents = new ArrayList<TableColumn>();
-        Map<TableColumn, Table> allPrimaries = new TreeMap<TableColumn, Table>(new Comparator<TableColumn>() {
+        Map<TableColumn, Table> keyedTablesByPrimary = new TreeMap<TableColumn, Table>(new Comparator<TableColumn>() {
             public int compare(TableColumn column1, TableColumn column2) {
                 int rc = column1.getName().compareToIgnoreCase(column2.getName());
                 if (rc == 0) {
@@ -68,10 +68,23 @@ public class DbAnalyzer {
         for (Table table : tables) {
             List<TableColumn> tablePrimaries = table.getPrimaryColumns();
             if (tablePrimaries.size() == 1) { // can't match up multiples...yet...
-                for (TableColumn primary : tablePrimaries) {
-                    if (primary.allowsImpliedChildren() &&
-                        allPrimaries.put(primary, table) != null)
-                        ++duplicatePrimaries;
+            	TableColumn primary = tablePrimaries.get(0);
+                if (primary.allowsImpliedChildren()) {
+                	Table existingTable = keyedTablesByPrimary.get(primary);
+                	if (existingTable == null) {
+                		// new primary key name/type discovered
+                    	keyedTablesByPrimary.put(primary, table);
+                	} else {
+                		++duplicatePrimaries;
+
+                		// already found one with this signature. keep the one with
+                		// the most children since it's most likely to be the one of
+                		// most importance
+                		TableColumn existingPrimary = existingTable.getPrimaryColumns().get(0);
+                		if (primary.getChildren().size() > existingPrimary.getChildren().size()) {
+                			keyedTablesByPrimary.put(primary, table);
+                		}
+                	}
                 }
             }
 
@@ -84,14 +97,14 @@ public class DbAnalyzer {
         // if more than half of the tables have the same primary key then
         // it's most likely a database where primary key names aren't unique
         // (e.g. they all have a primary key named 'ID')
-        if (duplicatePrimaries > allPrimaries.size()) // bizarre logic, but it does approximately what we need
+        if (duplicatePrimaries > keyedTablesByPrimary.size()) // bizarre logic, but it does approximately what we need
             return new ArrayList<ImpliedForeignKeyConstraint>();
 
         sortColumnsByTable(columnsWithoutParents);
 
         List<ImpliedForeignKeyConstraint> impliedConstraints = new ArrayList<ImpliedForeignKeyConstraint>();
         for (TableColumn childColumn : columnsWithoutParents) {
-            Table primaryTable = allPrimaries.get(childColumn);
+            Table primaryTable = keyedTablesByPrimary.get(childColumn);
             if (primaryTable != null && primaryTable != childColumn.getTable()) {
                 TableColumn parentColumn = primaryTable.getColumn(childColumn.getName());
                 // make sure the potential child->parent relationships isn't already a
