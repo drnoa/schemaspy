@@ -129,6 +129,7 @@ public class Table implements Comparable<Table> {
         if (getSchema() != null || getCatalog() != null) {
             try {
                 // get the foreign keys that reference our primary keys
+            	// note that this can take an insane amount of time on Oracle (i.e. 30 secs per call)
                 rs = db.getMetaData().getExportedKeys(getCatalog(), getSchema(), getName());
 
                 while (rs.next()) {
