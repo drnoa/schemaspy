@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.xml.SchemaMeta;
 import net.sourceforge.schemaspy.model.xml.TableMeta;
@@ -71,6 +72,15 @@ public class Database {
         this.catalog = catalog;
         this.schema = schema;
 
+        long startGathering = System.currentTimeMillis();
+        long startConnecting = 0;
+
+        logger.info("Gathering schema details");
+
+        if (config.isHtmlGenerationEnabled() && !fineEnabled) {
+            System.out.print("Gathering schema details...");
+        }
+
         initTables(meta);
         if (config.isViewsEnabled())
             initViews(meta);
@@ -85,8 +95,19 @@ public class Database {
         initColumnTypes();
         initRoutines();
 
+        if (config.isHtmlGenerationEnabled() && !fineEnabled) {
+            startConnecting = System.currentTimeMillis();
+            System.out.println("(" + (startConnecting - startGathering) / 1000 + "sec)");
+            System.out.print("Connecting relationships...");
+        }
+
         connectTables();
         updateFromXmlMetadata(schemaMeta);
+
+        if (config.isHtmlGenerationEnabled() && !fineEnabled) {
+            long endConnecting = System.currentTimeMillis();
+            System.out.println("(" + (endConnecting - startConnecting) / 1000 + "sec)");
+        }
     }
 
     public String getName() {
@@ -1094,10 +1115,19 @@ public class Database {
     }
 
     private void connectTables() throws SQLException {
+    	boolean showProgress = config.isHtmlGenerationEnabled() && !fineEnabled;
+    	
         for (Table table : tables.values()) {
+        	if (showProgress)
+        		System.out.print('.');
+
             table.connectForeignKeys(locals);
         }
+
         for (Table view : views.values()) {
+        	if (showProgress)
+        		System.out.print('.');
+
             view.connectForeignKeys(locals);
         }
     }

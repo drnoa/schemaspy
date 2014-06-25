@@ -204,11 +204,6 @@ public class SchemaAnalyzer {
                 if (schemaMeta != null && schemaMeta.getFile() != null) {
                     logger.info("Using additional metadata from " + schemaMeta.getFile());
                 }
-
-                logger.info("Gathering schema details");
-
-                if (!fineEnabled)
-                    System.out.print("Gathering schema details...");
             }
 
             //
@@ -240,9 +235,6 @@ public class SchemaAnalyzer {
 
             if (config.isHtmlGenerationEnabled()) {
                 startSummarizing = System.currentTimeMillis();
-                if (!fineEnabled) {
-                    System.out.println("(" + (startSummarizing - start) / 1000 + "sec)");
-                }
 
                 logger.info("Gathered schema details in " + (startSummarizing - start) / 1000 + " seconds");
                 logger.info("Writing/graphing summary");
