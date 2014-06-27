@@ -1,6 +1,6 @@
 /*
  * This file is a part of the SchemaSpy project (http://schemaspy.sourceforge.net).
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 John Currier
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2014 John Currier
  *
  * SchemaSpy is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
@@ -437,7 +438,7 @@ public class HtmlTablePage extends HtmlFormatter {
             String formatted = Config.getInstance().getSqlFormatter().format(sql, db, references);
 
             out.writeln("<div class='indent spacer'>");
-            out.writeln("  View Definition:");
+            out.writeln("  <b>View Definition:</b><br/>");
             out.writeln(formatted);
             out.writeln("</div>");
             out.writeln("<div class='spacer'>&nbsp;</div>");
