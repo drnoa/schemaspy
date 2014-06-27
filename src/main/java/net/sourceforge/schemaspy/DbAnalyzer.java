@@ -1,6 +1,6 @@
 /*
  * This file is a part of the SchemaSpy project (http://schemaspy.sourceforge.net).
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 John Currier
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2014 John Currier
  *
  * SchemaSpy is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,19 +35,20 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.ImpliedForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.RailsForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.model.TableColumn;
-import net.sourceforge.schemaspy.model.TableIndex;
 import net.sourceforge.schemaspy.util.Inflection;
 
 public class DbAnalyzer {
     public static List<ImpliedForeignKeyConstraint> getImpliedConstraints(Collection<Table> tables) {
         List<TableColumn> columnsWithoutParents = new ArrayList<TableColumn>();
         Map<TableColumn, Table> keyedTablesByPrimary = new TreeMap<TableColumn, Table>(new Comparator<TableColumn>() {
-            public int compare(TableColumn column1, TableColumn column2) {
+            @Override
+			public int compare(TableColumn column1, TableColumn column2) {
                 int rc = column1.getName().compareToIgnoreCase(column2.getName());
                 if (rc == 0) {
 	                if (column1.getType() != null && column2.getType() != null)
@@ -191,24 +192,6 @@ public class DbAnalyzer {
     }
 
     /**
-     * Return a list of <code>TableColumn</code>s that are both nullable
-     * and have an index that specifies that they must be unique (a rather strange combo).
-     */
-    public static List<TableColumn> getMustBeUniqueNullableColumns(Collection<Table> tables) {
-        List<TableColumn> uniqueNullables = new ArrayList<TableColumn>();
-
-        for (Table table : tables) {
-            for (TableIndex index : table.getIndexes()) {
-                if (index.isUniqueNullable()) {
-                    uniqueNullables.addAll(index.getColumns());
-                }
-            }
-        }
-
-        return sortColumnsByTable(uniqueNullables);
-    }
-
-    /**
      * Return a list of <code>Table</code>s that have neither an index nor a primary key.
      */
     public static List<Table> getTablesWithoutIndexes(Collection<Table> tables) {
@@ -279,7 +262,8 @@ public class DbAnalyzer {
 
     public static List<Table> sortTablesByName(List<Table> tables) {
         Collections.sort(tables, new Comparator<Table>() {
-            public int compare(Table table1, Table table2) {
+            @Override
+			public int compare(Table table1, Table table2) {
                 return table1.compareTo(table2);
             }
         });
@@ -289,7 +273,8 @@ public class DbAnalyzer {
 
     public static List<TableColumn> sortColumnsByTable(List<TableColumn> columns) {
         Collections.sort(columns, new Comparator<TableColumn>() {
-            public int compare(TableColumn column1, TableColumn column2) {
+            @Override
+			public int compare(TableColumn column1, TableColumn column2) {
                 int rc = column1.getTable().compareTo(column2.getTable());
                 if (rc == 0)
                     rc = column1.getName().compareToIgnoreCase(column2.getName());

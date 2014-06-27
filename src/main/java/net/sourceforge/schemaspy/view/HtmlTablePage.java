@@ -341,17 +341,9 @@ public class HtmlTablePage extends HtmlFormatter {
         boolean showId = table.getId() != null;
         Set<TableIndex> indexes = table.getIndexes();
         if (indexes != null && !indexes.isEmpty()) {
-            // see if we've got any strangeness so we can have the correct number of colgroups
-            boolean containsAnomalies = false;
-            for (TableIndex index : indexes) {
-                containsAnomalies = index.isUniqueNullable();
-                if (containsAnomalies)
-                    break;
-            }
-
             out.writeln("<div class='indent'>");
             out.writeln("<b>Indexes:</b>");
-            out.writeln("<table class='dataTable' border='1' rules='groups'><colgroup><colgroup><colgroup><colgroup>" + (showId ? "<colgroup>" : "") + (containsAnomalies ? "<colgroup>" : ""));
+            out.writeln("<table class='dataTable' border='1' rules='groups'><colgroup><colgroup><colgroup><colgroup>" + (showId ? "<colgroup>" : ""));
             out.writeln("<thead>");
             out.writeln(" <tr>");
             if (showId)
@@ -360,8 +352,6 @@ public class HtmlTablePage extends HtmlFormatter {
             out.writeln("  <th>Type</th>");
             out.writeln("  <th>Sort</th>");
             out.writeln("  <th class='constraint' style='text-align:left;'>Constraint Name</th>");
-            if (containsAnomalies)
-                out.writeln("  <th>Anomalies</th>");
             out.writeln(" </tr>");
             out.writeln("</thead>");
             out.writeln("<tbody>");
@@ -407,15 +397,6 @@ public class HtmlTablePage extends HtmlFormatter {
                 out.write("  <td class='constraint' style='text-align:left;'>");
                 out.write(index.getName());
                 out.writeln("</td>");
-
-                if (index.isUniqueNullable()) {
-                    if (index.getColumns().size() == 1)
-                        out.writeln("  <td class='detail'>This unique column is also nullable</td>");
-                    else
-                        out.writeln("  <td class='detail'>These unique columns are also nullable</td>");
-                } else if (containsAnomalies) {
-                    out.writeln("  <td>&nbsp;</td>");
-                }
                 out.writeln(" </tr>");
             }
             out.writeln("</tbody>");

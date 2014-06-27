@@ -1,6 +1,6 @@
 /*
  * This file is a part of the SchemaSpy project (http://schemaspy.sourceforge.net).
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 John Currier
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2014 John Currier
  *
  * SchemaSpy is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@ import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
 import net.sourceforge.schemaspy.DbAnalyzer;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
@@ -58,7 +59,6 @@ public class HtmlAnomaliesPage extends HtmlFormatter {
         writeHeader(database, out);
         writeImpliedConstraints(impliedConstraints, out);
         writeTablesWithoutIndexes(DbAnalyzer.getTablesWithoutIndexes(new HashSet<Table>(tables)), out);
-        writeUniqueNullables(DbAnalyzer.getMustBeUniqueNullableColumns(new HashSet<Table>(tables)), out);
         writeTablesWithOneColumn(DbAnalyzer.getTablesWithOneColumn(tables), out);
         writeTablesWithIncrementingColumnNames(DbAnalyzer.getTablesWithIncrementingColumnNames(tables), out);
         writeDefaultNullStrings(DbAnalyzer.getDefaultNullStringColumns(new HashSet<Table>(tables)), out);
@@ -132,13 +132,6 @@ public class HtmlAnomaliesPage extends HtmlFormatter {
             out.writeln("</table>");
         }
         writeSummary(numDetected, out);
-        out.writeln("<p></li>");
-    }
-
-    private void writeUniqueNullables(List<TableColumn> uniqueNullables, LineWriter out) throws IOException {
-        out.writeln("<li>");
-        out.writeln("<b>Columns that are flagged as both 'nullable' and 'must be unique':</b>");
-        writeColumnBasedAnomaly(uniqueNullables, out);
         out.writeln("<p></li>");
     }
 

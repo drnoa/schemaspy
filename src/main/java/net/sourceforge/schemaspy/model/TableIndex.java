@@ -1,6 +1,6 @@
 /*
  * This file is a part of the SchemaSpy project (http://schemaspy.sourceforge.net).
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010 John Currier
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2014 John Currier
  *
  * SchemaSpy is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -111,27 +111,6 @@ public class TableIndex implements Comparable<TableIndex> {
     }
 
     /**
-     * Yes, we had a project that had columns defined as both 'nullable' and 'must be unique'.
-     *
-     * @return boolean
-     */
-    public boolean isUniqueNullable() {
-        if (!isUnique())
-            return false;
-
-        // if all of the columns specified by the Unique Index are nullable
-        // then return true, otherwise false
-        boolean allNullable = true;
-        for (TableColumn column : getColumns()) {
-            allNullable = column != null && column.isNullable();
-            if (!allNullable)
-                break;
-        }
-
-        return allNullable;
-    }
-
-    /**
      * @param column
      * @return
      */
@@ -143,7 +122,8 @@ public class TableIndex implements Comparable<TableIndex> {
      * @param object
      * @return
      */
-    public int compareTo(TableIndex other) {
+    @Override
+	public int compareTo(TableIndex other) {
         if (isPrimaryKey() && !other.isPrimaryKey())
             return -1;
         if (!isPrimaryKey() && other.isPrimaryKey())
