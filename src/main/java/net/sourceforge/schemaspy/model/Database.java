@@ -1,6 +1,6 @@
 /*
  * This file is a part of the SchemaSpy project (http://schemaspy.sourceforge.net).
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 John Currier
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2014 John Currier
  *
  * SchemaSpy is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -63,23 +63,21 @@ public class Database {
     private Pattern invalidIdentifierPattern;
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final boolean fineEnabled = logger.isLoggable(Level.FINE);
+	private final ProgressListener listener;
 
-    public Database(Config config, Connection connection, DatabaseMetaData meta, String name, String catalog, String schema, SchemaMeta schemaMeta) throws SQLException, MissingResourceException {
+    public Database(Config config, Connection connection, DatabaseMetaData meta, String name, String catalog, String schema, SchemaMeta schemaMeta,
+    				ProgressListener progressListener) throws SQLException, MissingResourceException {
         this.config = config;
         this.connection = connection;
         this.meta = meta;
         this.databaseName = name;
         this.catalog = catalog;
         this.schema = schema;
-
-        long startGathering = System.currentTimeMillis();
-        long startConnecting = 0;
+        this.listener = progressListener;
 
         logger.info("Gathering schema details");
 
-        if (config.isHtmlGenerationEnabled() && !fineEnabled) {
-            System.out.print("Gathering schema details...");
-        }
+        progressListener.startedGatheringDetails();
 
         initTables(meta);
         if (config.isViewsEnabled())
@@ -95,19 +93,10 @@ public class Database {
         initColumnTypes();
         initRoutines();
 
-        if (config.isHtmlGenerationEnabled() && !fineEnabled) {
-            startConnecting = System.currentTimeMillis();
-            System.out.println("(" + (startConnecting - startGathering) / 1000 + "sec)");
-            System.out.print("Connecting relationships...");
-        }
+        progressListener.startedConnectingTables();
 
         connectTables();
         updateFromXmlMetadata(schemaMeta);
-
-        if (config.isHtmlGenerationEnabled() && !fineEnabled) {
-            long endConnecting = System.currentTimeMillis();
-            System.out.println("(" + (endConnecting - startConnecting) / 1000 + "sec)");
-        }
     }
 
     public String getName() {
@@ -313,10 +302,10 @@ public class Database {
                 View view = new View(this, entry.catalog, entry.schema, entry.name,
                                     entry.remarks, entry.viewSql);
                 views.put(view.getName(), view);
+                listener.gatheringDetailsProgressed(view);
+
                 if (fineEnabled) {
                     logger.fine("Found details of view " + view.getName());
-                } else {
-                    System.out.print('.');
                 }
             }
         }
@@ -396,7 +385,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve " + clazz + " names with custom SQL: " + sqlException, sql);
+            	String msg = listener.recoverableExceptionEncountered("Failed to retrieve " + clazz + " names with custom SQL", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -488,7 +480,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve check constraints: " + sqlException, sql);
+                String msg = listener.recoverableExceptionEncountered("Failed to retrieve check constraints", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -522,7 +517,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve column type details: " + sqlException, sql);
+                String msg = listener.recoverableExceptionEncountered("Failed to retrieve column type details", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -618,7 +616,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve table/view comments: " + sqlException, sql);
+                String msg = listener.recoverableExceptionEncountered("Failed to retrieve table/view comments", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -654,7 +655,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve table/view comments: " + sqlException, sql);
+            	String msg = listener.recoverableExceptionEncountered("Failed to retrieve table/view comments", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -692,7 +696,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve column comments: " + sqlException, sql);
+                String msg = listener.recoverableExceptionEncountered("Failed to retrieve column comments", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -731,7 +738,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve view column comments: " + sqlException, sql);
+                String msg = listener.recoverableExceptionEncountered("Failed to retrieve view column comments", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -775,7 +785,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve stored procedure/function details: " + sqlException, sql);
+                String msg = listener.recoverableExceptionEncountered("Failed to retrieve stored procedure/function details", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -812,7 +825,10 @@ public class Database {
                 }
             } catch (SQLException sqlException) {
                 // don't die just because this failed
-                warning("Failed to retrieve stored procedure/function details: " + sqlException, sql);
+            	String msg = listener.recoverableExceptionEncountered("Failed to retrieve stored procedure/function details", sqlException, sql);
+            	if (msg != null) {
+            		logger.warning(msg);
+            	}
             } finally {
                 if (rs != null)
                     rs.close();
@@ -820,20 +836,6 @@ public class Database {
                     stmt.close();
             }
         }
-    }
-
-    /**
-     * Dump a warning message out to a new line
-     *
-     * @param msg1
-     * @param msg2
-     */
-    private void warning(String msg1, String msg2) {
-        System.out.println();
-        System.out.flush();
-        logger.warning(msg1);
-        if (msg2 != null)
-            logger.warning(msg2);
     }
 
     /**
@@ -1115,18 +1117,14 @@ public class Database {
     }
 
     private void connectTables() throws SQLException {
-    	boolean showProgress = config.isHtmlGenerationEnabled() && !fineEnabled;
-    	
         for (Table table : tables.values()) {
-        	if (showProgress)
-        		System.out.print('.');
+            listener.connectingTablesProgressed(table);
 
             table.connectForeignKeys(locals);
         }
 
         for (Table view : views.values()) {
-        	if (showProgress)
-        		System.out.print('.');
+            listener.connectingTablesProgressed(view);
 
             view.connectForeignKeys(locals);
         }
@@ -1166,10 +1164,10 @@ public class Database {
                 tables.put(table.getName(), table);
             }
 
+            listener.gatheringDetailsProgressed(table);
+
             if (logger.isLoggable(Level.FINE)) {
                 logger.fine("Retrieved details of " + table.getFullName());
-            } else {
-                System.out.print('.');
             }
         }
 
@@ -1265,51 +1263,60 @@ public class Database {
             this.map2 = map2;
         }
 
-        public Table get(Object name) {
+        @Override
+		public Table get(Object name) {
             Table table = map1.get(name);
             if (table == null)
                 table = map2.get(name);
             return table;
         }
 
-        public int size() {
+        @Override
+		public int size() {
             return map1.size() + map2.size();
         }
 
-        public boolean isEmpty() {
+        @Override
+		public boolean isEmpty() {
             return map1.isEmpty() && map2.isEmpty();
         }
 
-        public boolean containsKey(Object key) {
+        @Override
+		public boolean containsKey(Object key) {
             return map1.containsKey(key) || map2.containsKey(key);
         }
 
-        public boolean containsValue(Object value) {
+        @Override
+		public boolean containsValue(Object value) {
             return map1.containsValue(value) || map2.containsValue(value);
         }
 
-        public Table put(String name, Table table) {
+        @Override
+		public Table put(String name, Table table) {
             throw new UnsupportedOperationException();
         }
 
         /**
          * Warning: potentially expensive operation
          */
-        public Set<String> keySet() {
+        @Override
+		public Set<String> keySet() {
             return getCombined().keySet();
         }
 
         /**
          * Warning: potentially expensive operation
          */
-        public Set<Map.Entry<String, Table>> entrySet() {
+        @Override
+		public Set<Map.Entry<String, Table>> entrySet() {
             return getCombined().entrySet();
         }
 
         /**
          * Warning: potentially expensive operation
          */
-        public Collection<Table> values() {
+        @Override
+		public Collection<Table> values() {
             return getCombined().values();
         }
 
@@ -1320,15 +1327,18 @@ public class Database {
             return all;
         }
 
-        public Table remove(Object key) {
+        @Override
+		public Table remove(Object key) {
             throw new UnsupportedOperationException();
         }
 
-        public void putAll(Map<? extends String, ? extends Table> table) {
+        @Override
+		public void putAll(Map<? extends String, ? extends Table> table) {
             throw new UnsupportedOperationException();
         }
 
-        public void clear() {
+        @Override
+		public void clear() {
             throw new UnsupportedOperationException();
         }
     }

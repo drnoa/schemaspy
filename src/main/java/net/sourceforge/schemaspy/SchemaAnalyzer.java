@@ -38,14 +38,20 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 import net.sourceforge.schemaspy.model.ConnectionFailure;
+import net.sourceforge.schemaspy.model.ConsoleProgressListener;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.EmptySchemaException;
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.ImpliedForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.InvalidConfigurationException;
+import net.sourceforge.schemaspy.model.ProgressListener;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.model.TableColumn;
 import net.sourceforge.schemaspy.model.xml.SchemaMeta;
@@ -70,6 +76,7 @@ import net.sourceforge.schemaspy.view.StyleSheet;
 import net.sourceforge.schemaspy.view.TextFormatter;
 import net.sourceforge.schemaspy.view.WriteStats;
 import net.sourceforge.schemaspy.view.XmlTableFormatter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -80,7 +87,16 @@ public class SchemaAnalyzer {
     private final Logger logger = Logger.getLogger(getClass().getName());
     private boolean fineEnabled;
 
-    public Database analyze(Config config) throws Exception {
+    public Database analyze(Config config) throws SQLException, IOException {
+    	// don't render console-based detail unless we're generating HTML (those probably don't have a user watching)
+    	// and not already logging fine details (to keep from obfuscating those)
+        boolean render = config.isHtmlGenerationEnabled() && !fineEnabled;
+        ProgressListener progressListener = new ConsoleProgressListener(render);
+
+        return analyze(config, progressListener);
+    }
+
+    public Database analyze(Config config, ProgressListener progressListener) throws SQLException, IOException {
         try {
             if (config.isHelpRequired()) {
                 config.dumpUsage(null, false);
@@ -105,10 +121,6 @@ public class SchemaAnalyzer {
 
             fineEnabled = logger.isLoggable(Level.FINE);
             logger.info("Starting schema analysis");
-
-            long start = System.currentTimeMillis();
-            long startDiagrammingDetails = start;
-            long startSummarizing = start;
 
             File outputDir = config.getOutputDir();
             if (!outputDir.isDirectory()) {
@@ -209,7 +221,9 @@ public class SchemaAnalyzer {
             //
             // create our representation of the database
             //
-            Database db = new Database(config, connection, meta, dbName, catalog, schema, schemaMeta);
+            Database db = new Database(config, connection, meta, dbName, catalog, schema, schemaMeta, progressListener);
+
+            long duration = progressListener.startedGraphingSummaries();
 
             schemaMeta = null; // done with it so let GC reclaim it
 
@@ -224,7 +238,13 @@ public class SchemaAnalyzer {
             }
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            DocumentBuilder builder;
+			try {
+				builder = factory.newDocumentBuilder();
+			} catch (ParserConfigurationException exc) {
+				throw new RuntimeException(exc);
+			}
+
             Document document = builder.newDocument();
             Element rootNode = document.createElement("database");
             document.appendChild(rootNode);
@@ -234,21 +254,14 @@ public class SchemaAnalyzer {
             DOMUtil.appendAttribute(rootNode, "type", db.getDatabaseProduct());
 
             if (config.isHtmlGenerationEnabled()) {
-                startSummarizing = System.currentTimeMillis();
-
-                logger.info("Gathered schema details in " + (startSummarizing - start) / 1000 + " seconds");
+                logger.info("Gathered schema details in " + duration / 1000 + " seconds");
                 logger.info("Writing/graphing summary");
-                System.err.flush();
-                System.out.flush();
-                if (!fineEnabled) {
-                    System.out.print("Writing/graphing summary");
-                    System.out.print(".");
-                }
+
                 ImageWriter.getInstance().writeImages(outputDir);
                 ResourceWriter.getInstance().writeResource("/jquery.js", new File(outputDir, "/jquery.js"));
                 ResourceWriter.getInstance().writeResource("/schemaSpy.js", new File(outputDir, "/schemaSpy.js"));
-                if (!fineEnabled)
-                    System.out.print(".");
+
+                progressListener.graphingSummaryProgressed();
 
                 boolean showDetailedTables = tables.size() <= config.getMaxDetailedTables();
                 final boolean includeImpliedConstraints = config.isImpliedConstraintsEnabled();
@@ -272,8 +285,7 @@ public class SchemaAnalyzer {
 
                 if (hasRealRelationships) {
                     // real relationships exist so generate the 'big' form of the relationships .dot file
-                    if (!fineEnabled)
-                        System.out.print(".");
+                    progressListener.graphingSummaryProgressed();
                     out = new LineWriter(new File(summaryDir, dotBaseFilespec + ".real.large.dot"), Config.DOT_CHARSET);
                     DotFormatter.getInstance().writeRealRelationships(db, tables, false, showDetailedTables, stats, out);
                     out.close();
@@ -291,8 +303,7 @@ public class SchemaAnalyzer {
                 config.setHasOrphans(!orphans.isEmpty() && Dot.getInstance().isValid());
                 config.setHasRoutines(!db.getRoutines().isEmpty());
 
-                if (!fineEnabled)
-                    System.out.print(".");
+                progressListener.graphingSummaryProgressed();
 
                 File impliedDotFile = new File(summaryDir, dotBaseFilespec + ".implied.compact.dot");
                 out = new LineWriter(impliedDotFile, Config.DOT_CHARSET);
@@ -310,11 +321,11 @@ public class SchemaAnalyzer {
                 }
 
                 out = new LineWriter(new File(outputDir, dotBaseFilespec + ".html"), config.getCharset());
-                HtmlRelationshipsPage.getInstance().write(db, summaryDir, dotBaseFilespec, hasRealRelationships, hasImplied, excludedColumns, out);
+                HtmlRelationshipsPage.getInstance().write(db, summaryDir, dotBaseFilespec, hasRealRelationships, hasImplied, excludedColumns,
+                											progressListener, out);
                 out.close();
 
-                if (!fineEnabled)
-                    System.out.print(".");
+                progressListener.graphingSummaryProgressed();
 
                 dotBaseFilespec = "utilities";
                 File orphansDir = new File(outputDir, "diagrams/orphans");
@@ -324,15 +335,13 @@ public class SchemaAnalyzer {
                 orphans = null;
                 out.close();
 
-                if (!fineEnabled)
-                    System.out.print(".");
+                progressListener.graphingSummaryProgressed();
 
                 out = new LineWriter(new File(outputDir, "index.html"), 64 * 1024, config.getCharset());
                 HtmlMainIndexPage.getInstance().write(db, tables, db.getRemoteTables(), out);
                 out.close();
 
-                if (!fineEnabled)
-                    System.out.print(".");
+                progressListener.graphingSummaryProgressed();
 
                 List<ForeignKeyConstraint> constraints = DbAnalyzer.getForeignKeyConstraints(tables);
                 out = new LineWriter(new File(outputDir, "constraints.html"), 256 * 1024, config.getCharset());
@@ -340,15 +349,13 @@ public class SchemaAnalyzer {
                 constraintIndexFormatter.write(db, constraints, tables, out);
                 out.close();
 
-                if (!fineEnabled)
-                    System.out.print(".");
+                progressListener.graphingSummaryProgressed();
 
                 out = new LineWriter(new File(outputDir, "anomalies.html"), 16 * 1024, config.getCharset());
                 HtmlAnomaliesPage.getInstance().write(db, tables, impliedConstraints, out);
                 out.close();
 
-                if (!fineEnabled)
-                    System.out.print(".");
+                progressListener.graphingSummaryProgressed();
 
                 for (HtmlColumnsPage.ColumnInfo columnInfo : HtmlColumnsPage.getInstance().getColumnInfos().values()) {
                     out = new LineWriter(new File(outputDir, columnInfo.getLocation()), 16 * 1024, config.getCharset());
@@ -356,8 +363,7 @@ public class SchemaAnalyzer {
                     out.close();
                 }
 
-                if (!fineEnabled)
-                    System.out.print(".");
+                progressListener.graphingSummaryProgressed();
 
                 out = new LineWriter(new File(outputDir, "routines.html"), 16 * 1024, config.getCharset());
                 HtmlRoutinesPage.getInstance().write(db, out);
@@ -365,20 +371,15 @@ public class SchemaAnalyzer {
 
                 // create detailed diagrams
 
-                startDiagrammingDetails = System.currentTimeMillis();
-                if (!fineEnabled)
-                    System.out.println("(" + (startDiagrammingDetails - startSummarizing) / 1000 + "sec)");
-                logger.info("Completed summary in " + (startDiagrammingDetails - startSummarizing) / 1000 + " seconds");
+                duration = progressListener.startedGraphingDetails();
+
+                logger.info("Completed summary in " + duration / 1000 + " seconds");
                 logger.info("Writing/diagramming details");
-                if (!fineEnabled) {
-                    System.out.print("Writing/diagramming details");
-                }
 
                 HtmlTablePage tableFormatter = HtmlTablePage.getInstance();
                 for (Table table : tables) {
-                    if (!fineEnabled)
-                        System.out.print('.');
-                    else
+                	progressListener.graphingDetailsProgressed(table);
+                    if (fineEnabled)
                         logger.fine("Writing details of " + table.getName());
 
                     out = new LineWriter(new File(outputDir, "tables/" + table.getName() + ".html"), 24 * 1024, config.getCharset());
@@ -390,7 +391,6 @@ public class SchemaAnalyzer {
                 StyleSheet.getInstance().write(out);
                 out.close();
             }
-
 
             XmlTableFormatter.getInstance().appendTables(rootNode, tables);
 
@@ -408,7 +408,11 @@ public class SchemaAnalyzer {
 
             out = new LineWriter(new File(outputDir, xmlName + ".xml"), Config.DOT_CHARSET);
             document.getDocumentElement().normalize();
-            DOMUtil.printDOM(document, out);
+            try {
+				DOMUtil.printDOM(document, out);
+			} catch (TransformerException exc) {
+				throw new IOException(exc);
+			}
             out.close();
 
             // 'try' to make some memory available for the sorting process
@@ -440,38 +444,15 @@ public class SchemaAnalyzer {
             TextFormatter.getInstance().write(orderedTables, false, out);
             out.close();
 
-            /* we'll eventually want to put this functionality back in with a
-             * database independent implementation
-            File constraintsFile = new File(outputDir, "removeRecursiveConstraints.sql");
-            constraintsFile.delete();
-            if (!recursiveConstraints.isEmpty()) {
-                out = new LineWriter(constraintsFile, 4 * 1024);
-                writeRemoveRecursiveConstraintsSql(recursiveConstraints, schema, out);
-                out.close();
-            }
-
-            constraintsFile = new File(outputDir, "restoreRecursiveConstraints.sql");
-            constraintsFile.delete();
-
-            if (!recursiveConstraints.isEmpty()) {
-                out = new LineWriter(constraintsFile, 4 * 1024);
-                writeRestoreRecursiveConstraintsSql(recursiveConstraints, schema, out);
-                out.close();
-            }
-            */
+            duration = progressListener.finishedGatheringDetails();
+            long overallDuration = progressListener.finished(tables, config);
 
             if (config.isHtmlGenerationEnabled()) {
-                long end = System.currentTimeMillis();
-                if (!fineEnabled)
-                    System.out.println("(" + (end - startDiagrammingDetails) / 1000 + "sec)");
-                logger.info("Wrote table details in " + (end - startDiagrammingDetails) / 1000 + " seconds");
+                logger.info("Wrote table details in " + duration / 1000 + " seconds");
 
                 if (logger.isLoggable(Level.INFO)) {
-                    logger.info("Wrote relationship details of " + tables.size() + " tables/views to directory '" + config.getOutputDir() + "' in " + (end - start) / 1000 + " seconds.");
+                    logger.info("Wrote relationship details of " + tables.size() + " tables/views to directory '" + config.getOutputDir() + "' in " + overallDuration / 1000 + " seconds.");
                     logger.info("View the results by opening " + new File(config.getOutputDir(), "index.html"));
-                } else {
-                    System.out.println("Wrote relationship details of " + tables.size() + " tables/views to directory '" + config.getOutputDir() + "' in " + (end - start) / 1000 + " seconds.");
-                    System.out.println("View the results by opening " + new File(config.getOutputDir(), "index.html"));
                 }
             }
 
