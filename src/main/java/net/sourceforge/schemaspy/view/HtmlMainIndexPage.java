@@ -18,18 +18,29 @@
  */
 package net.sourceforge.schemaspy.view;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.util.HtmlEncoder;
 import net.sourceforge.schemaspy.util.LineWriter;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 
 /**
  * The main index that contains all tables and views that were evaluated
@@ -39,11 +50,13 @@ import net.sourceforge.schemaspy.util.LineWriter;
 public class HtmlMainIndexPage extends HtmlFormatter {
     private static HtmlMainIndexPage instance = new HtmlMainIndexPage();
     private final NumberFormat integerFormatter = NumberFormat.getIntegerInstance();
+    private Configuration cfg;
 
     /**
      * Singleton: Don't allow instantiation
      */
     private HtmlMainIndexPage() {
+    	cfg = getFreemarkerConfig();
     }
 
     /**
@@ -53,6 +66,22 @@ public class HtmlMainIndexPage extends HtmlFormatter {
      */
     public static HtmlMainIndexPage getInstance() {
         return instance;
+    }
+    
+    private static Configuration getFreemarkerConfig(){
+    	Configuration cfg = new Configuration();
+    	ClassLoader classLoader = HtmlMainIndexPage.class.getClassLoader();
+    	File file = new File("D:\\00_dev\\00_projects\\schemaspyws\\code\\src\\main\\resources\\templates");
+    	
+        try {
+			cfg.setDirectoryForTemplateLoading(file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        return cfg;
     }
 
     public void write(Database database, Collection<Table> tables, Collection<Table> remotes, LineWriter html) throws IOException {
@@ -231,85 +260,104 @@ public class HtmlMainIndexPage extends HtmlFormatter {
         html.writeln("</thead>");
         html.writeln("<tbody>");
     }
+    
+    protected void writeLineItemFM(Table table, boolean showIds, LineWriter html) throws IOException, TemplateException {
+    	 Template temp = cfg.getTemplate("mainindex/item.ftl");
+    	 
+    	 Map data = new HashMap();
+         data.put("table", table);
+         data.put("showIds", showIds);
+         data.put("oneOfMultipleSchemas", Config.getInstance().isOneOfMultipleSchemas());
+    	 
+    	 Writer out = new StringWriter();
+    	 temp.process(data, out);
+    	 html.write(out.toString());
+    }
 
-    private void writeLineItem(Table table, boolean showIds, LineWriter html) throws IOException {
-        html.write(" <tr class='" + (table.isView() ? "view" : "tbl") + "' valign='top'>");
-        html.write("  <td class='detail'>");
-
-        String tableName = table.getName();
-
-        if (table.isRemote() && !Config.getInstance().isOneOfMultipleSchemas()) {
-            html.write(table.getContainer());
-            html.write('.');
-            html.write(tableName);
-        } else {
-            if (table.isRemote()) {
-                html.write("<a href='../" + urlEncode(table.getContainer()) + "/index.html'>");
-                html.write(table.getContainer());
-                html.write("</a>.");
-            }
-            html.write("<a href='tables/");
-            if (table.isRemote()) {
-                html.write("../../" + urlEncode(table.getContainer()) + "/tables/");
-            }
-            html.write(urlEncode(tableName));
-            html.write(".html'>");
-            html.write(tableName);
-            html.write("</a>");
-        }
-
-        html.writeln("</td>");
-
-        if (showIds) {
-            html.write("  <td class='detail' align='right'>");
-            Object id = table.getId();
-            if (id != null)
-                html.write(String.valueOf(id));
-            else
-                html.writeln("&nbsp;");
-            html.writeln("</td>");
-        }
-
-        html.write("  <td class='detail' align='right'>");
-        int numRelatives = table.getNumNonImpliedChildren();
-        if (numRelatives != 0)
-            html.write(String.valueOf(integerFormatter.format(numRelatives)));
-        html.writeln("</td>");
-        html.write("  <td class='detail' align='right'>");
-        numRelatives = table.getNumNonImpliedParents();
-        if (numRelatives != 0)
-            html.write(String.valueOf(integerFormatter.format(numRelatives)));
-        html.writeln("</td>");
-
-        if (!table.isRemote()) {
-            html.write("  <td class='detail' align='right'>");
-            html.write(String.valueOf(integerFormatter.format(table.getColumns().size())));
-            html.writeln("</td>");
-
-            if (displayNumRows) {
-                html.write("  <td class='detail' align='right'>");
-                if (!table.isView()) {
-                    if (table.getNumRows() >= 0)
-                        html.write(String.valueOf(integerFormatter.format(table.getNumRows())));
-                    else
-                        html.write("<span title='Row count not available'>&nbsp;</span>");
-                } else
-                    html.write("<span title='Views contain no real rows'>view</span>");
-                html.writeln("</td>");
-            }
-        }
-
-        html.write("  <td class='comment detail'>");
-        String comments = table.getComments();
-        if (comments != null) {
-            if (encodeComments)
-                for (int i = 0; i < comments.length(); ++i)
-                    html.write(HtmlEncoder.encodeToken(comments.charAt(i)));
-            else
-                html.write(comments);
-        }
-        html.writeln("</td>");
-        html.writeln("  </tr>");
+    protected void writeLineItem(Table table, boolean showIds, LineWriter html) throws IOException {
+//        html.write(" <tr class='" + (table.isView() ? "view" : "tbl") + "' valign='top'>");
+//        html.write("  <td class='detail'>");
+//
+//        String tableName = table.getName();
+//
+//        if (table.isRemote() && !Config.getInstance().isOneOfMultipleSchemas()) {
+//            html.write(table.getContainer());
+//            html.write('.');
+//            html.write(tableName);
+//        } else {
+//            if (table.isRemote()) {
+//                html.write("<a href='../" + urlEncode(table.getContainer()) + "/index.html'>");
+//                html.write(table.getContainer());
+//                html.write("</a>.");
+//            }
+//            html.write("<a href='tables/");
+//            if (table.isRemote()) {
+//                html.write("../../" + urlEncode(table.getContainer()) + "/tables/");
+//            }
+//            html.write(urlEncode(tableName));
+//            html.write(".html'>");
+//            html.write(tableName);
+//            html.write("</a>");
+//        }
+//
+//        html.writeln("</td>");
+//
+//        if (showIds) {
+//            html.write("  <td class='detail' align='right'>");
+//            Object id = table.getId();
+//            if (id != null)
+//                html.write(String.valueOf(id));
+//            else
+//                html.writeln("&nbsp;");
+//            html.writeln("</td>");
+//        }
+//
+//        html.write("  <td class='detail' align='right'>");
+//        int numRelatives = table.getNumNonImpliedChildren();
+//        if (numRelatives != 0)
+//            html.write(String.valueOf(integerFormatter.format(numRelatives)));
+//        html.writeln("</td>");
+//        html.write("  <td class='detail' align='right'>");
+//        numRelatives = table.getNumNonImpliedParents();
+//        if (numRelatives != 0)
+//            html.write(String.valueOf(integerFormatter.format(numRelatives)));
+//        html.writeln("</td>");
+//
+//        if (!table.isRemote()) {
+//            html.write("  <td class='detail' align='right'>");
+//            html.write(String.valueOf(integerFormatter.format(table.getColumns().size())));
+//            html.writeln("</td>");
+//
+//            if (displayNumRows) {
+//                html.write("  <td class='detail' align='right'>");
+//                if (!table.isView()) {
+//                    if (table.getNumRows() >= 0)
+//                        html.write(String.valueOf(integerFormatter.format(table.getNumRows())));
+//                    else
+//                        html.write("<span title='Row count not available'>&nbsp;</span>");
+//                } else
+//                    html.write("<span title='Views contain no real rows'>view</span>");
+//                html.writeln("</td>");
+//            }
+//        }
+//
+//        html.write("  <td class='comment detail'>");
+//        String comments = table.getComments();
+//        if (comments != null) {
+//            if (encodeComments)
+//                for (int i = 0; i < comments.length(); ++i)
+//                    html.write(HtmlEncoder.encodeToken(comments.charAt(i)));
+//            else
+//                html.write(comments);
+//        }
+//        html.writeln("</td>");
+//        html.writeln("  </tr>");
+    	try {
+			writeLineItemFM(table, showIds, html);
+		} catch (TemplateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     protected void writeLocalsFooter(int numTables, int numTableCols, int numViews, int numViewCols, long numRows, LineWriter html) throws IOException {

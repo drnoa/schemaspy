@@ -48,7 +48,7 @@ public class Revision {
 
                 while ((line = reader.readLine()) != null) {
                     if (line.startsWith("Implementation-Build:")) {
-                        rev = line.split(" ")[1];
+                        //rev = 1;//line.split(" ")[1];
                         break;
                     }
                 }
