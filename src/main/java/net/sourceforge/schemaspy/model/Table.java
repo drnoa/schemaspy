@@ -1244,4 +1244,128 @@ public class Table implements Comparable<Table> {
             return id1.toString().compareToIgnoreCase(id2.toString());
         }
     }
+    
+    public boolean isAdditionalLink(){
+    	return TABLES_WITH_ADDITIONAL_LINK.contains(this.getName());
+    }
+    
+    
+    public static final Set<String> TABLES_WITH_ADDITIONAL_LINK;
+	static {
+		Set<String> tables = new HashSet<String>();
+		tables.add("TAART");
+		tables.add("TAARTTSPAMATRIX");
+		tables.add("TABZUG");
+		tables.add("TADRESSE");
+		tables.add("TANEFACHQUALI");
+		tables.add("TANERKENN");
+		tables.add("TANERKSPA");
+		tables.add("TANGEBOT");
+		tables.add("TANGEBOTLOB");
+		tables.add("TANGEBOTPAKET");
+		tables.add("TANGEBOTPERSON");
+		tables.add("TANMELDPERS");
+		tables.add("TANMELDUNG");
+		tables.add("TAUDITLOGRECORD");
+		tables.add("TAWKDATA");
+		tables.add("TBEMERKUNG");
+		tables.add("TBENUTZER");
+		tables.add("TBERGSPORTDATA");
+		tables.add("TBETREUER");
+		tables.add("TBEZIRK");
+		tables.add("TEMAILSENTLOG");
+		tables.add("TFACHQUALI");
+		tables.add("TGEMEINDE");
+		tables.add("THERKUNFT");
+		tables.add("TINFORMATION");
+		tables.add("TJSAMT");
+		tables.add("TKARTZUSATZ");
+		tables.add("TKATEGORIE");
+		tables.add("TKONTONR");
+		tables.add("TKTOANTRAG");
+		tables.add("TKURS");
+		tables.add("TKURSAGTEIL");
+		tables.add("TKURSAKTIVITAET");
+		tables.add("TKURSANGEBOT");
+		tables.add("TKURSANMELDUNG");
+		tables.add("TKURSANPERS");
+		tables.add("TKURSANWERT");
+		tables.add("TKURSART");
+		tables.add("TKURSARTATT");
+		tables.add("TKURSARTATTVALUE");
+		tables.add("TKURSLOB");
+		tables.add("TKURSQUALI");
+		tables.add("TKURSQUALIZUSATZCD1");
+		tables.add("TKURSQUALIZUSATZCD2");
+		tables.add("TKURSSPOART");
+		tables.add("TKURSSTUFE");
+		tables.add("TLEHRGANG");
+		tables.add("TLEHRGANGKURSAN");
+		tables.add("TLEHRGANGPERSON");
+		tables.add("TLEITEREINSATZ");
+		tables.add("TNGRUPTXTORG");
+		tables.add("TNUTZERGRUP");
+		tables.add("TNWFANMPERS");
+		tables.add("TORGANIGRUP");
+		tables.add("TORGANISAT");
+		tables.add("TORGANTRAG");
+		tables.add("TORT");
+		tables.add("TPBSKURSAN");
+		tables.add("TPERORGADR");
+		tables.add("TPERSINFO");
+		tables.add("TPERSON");
+		tables.add("TPERSONEXT");
+		tables.add("TPERSORGKT");
+		tables.add("TPLZORT");
+		tables.add("TPROPSCHLUESSEL");
+		tables.add("TPROPTEXTE");
+		tables.add("TPRUEFUNGSTEIL");
+		tables.add("TPSL_TRAN");
+		tables.add("TREPORTJUGEND_V2");
+		tables.add("TRUFNUMMER");
+		tables.add("TSARTGRUP");
+		tables.add("TSCHULE");
+		tables.add("TSPKANMANER");
+		tables.add("TSPORTART");
+		tables.add("TSPORTKURS");
+		tables.add("TSPORTKWERT");
+		tables.add("TSY_ACTION");
+		tables.add("TSY_PROFILE");
+		tables.add("TSY_PROFILE_ACTION");
+		tables.add("TSY_RESOURCE");
+		tables.add("TSY_RESOURCE_TYPE");
+		tables.add("TSY_RES_USR_TRN_AC");
+		tables.add("TSY_TRAN");
+		tables.add("TSY_TRAN_ACTION");
+		tables.add("TSY_USER");
+		tables.add("TSY_USER_PROF_RES");
+		tables.add("TSY_USER_TRN_ACT");
+		tables.add("TTEILNEHMER");
+		tables.add("TTNAKTIVIT");
+		tables.add("TTRAINERANMELDUNG");
+		tables.add("TUNTERVERB");
+		tables.add("TUNTERVERBAND");
+		tables.add("TUSERAMT");
+		tables.add("TVALIDATIONCARD");
+		tables.add("TVERBAND");
+		tables.add("TVEREIN");
+		tables.add("TVEREINIGUNG");
+		tables.add("TZAHLAUFTRAG");
+		tables.add("TZAHLPOSITION");
+		tables.add("TZAHLSTELLE");
+		tables.add("TZIELGRUPPE");
+		tables.add("TZUSATZANERK");
+		tables.add("TZUSATZCD1");
+		tables.add("TZUSATZCD2");
+		tables.add("TZUSATZINFO");
+		tables.add("VORGANISAT_DETAILS");
+		tables.add("VORGANISAT_EMAIL");
+		tables.add("VORGANISAT_SUCHE");
+		tables.add("VPUBLIC_TORGANISAT");
+
+		TABLES_WITH_ADDITIONAL_LINK = (tables);
+	}
+    
+    
+    
 }

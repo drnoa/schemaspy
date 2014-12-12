@@ -1,12 +1,10 @@
 package net.sourceforge.schemaspy.view;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.util.LineWriter;
 
@@ -17,20 +15,25 @@ import freemarker.template.TemplateException;
 
 public class HtmlMainIndexPageTest {
 
+	
 	@Test
-	public void testOutput() throws SQLException, IOException, TemplateException {
+	public void testOutputSingleTables() throws SQLException, IOException, TemplateException {
 		// given
 		HtmlMainIndexPage instance = HtmlMainIndexPage.getInstance();
 		Table table = Mockito.mock(Table.class);
 		Mockito.when(table.getName()).thenReturn("table");
 		Mockito.when(table.getComments()).thenReturn("comments");
-		//new Table(db, "catalog", "schema", "test", "comments");
+		
+		Table table2 = Mockito.mock(Table.class);
+		Mockito.when(table2.getName()).thenReturn("TAART");
+		Mockito.when(table2.getComments()).thenReturn("comments2");
+
 		LineWriter html = new LineWriter(System.out, "ISO-8859-1");
+		List<Table> tables = new ArrayList<Table>();
+		tables.add(table);
+		tables.add(table2);
 		// when
-		instance.writeLineItem(table , true, html);
-		
-		
-		instance.writeLineItemFM(table , true, html);
+		instance.writeTables(tables  , true, html, 2, 0);
 		
 		html.flush();
 		//then

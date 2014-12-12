@@ -46,4 +46,11 @@
 		${table.comments}
 	</#if>
 </td>
+<td class='comment detail'>
+	<#if additionalLinkBase??>
+		<#if table.additionalLink>
+		<a target="new" href="${additionalLinkBase}/${table.name}">Twiki</a>
+		</#if>
+	</#if>
+</td>
 </tr>
