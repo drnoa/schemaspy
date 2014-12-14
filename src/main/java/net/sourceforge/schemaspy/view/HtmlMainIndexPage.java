@@ -18,28 +18,16 @@
  */
 package net.sourceforge.schemaspy.view;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.util.LineWriter;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
 
 /**
  * The main index that contains all tables and views that were evaluated
@@ -48,15 +36,14 @@ import freemarker.template.TemplateExceptionHandler;
  */
 public class HtmlMainIndexPage extends HtmlFormatter {
 	private static HtmlMainIndexPage instance = new HtmlMainIndexPage();
-	private Configuration cfg;
-	private final static Logger logger = Logger
-			.getLogger(HtmlMainIndexPage.class.getName());
+	
+	private TemplateService templateService;
 
 	/**
 	 * Singleton: Don't allow instantiation
 	 */
 	private HtmlMainIndexPage() {
-		cfg = getFreemarkerConfig();
+		templateService = TemplateService.getInstance();
 	}
 
 	/**
@@ -68,21 +55,7 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 		return instance;
 	}
 
-	private static Configuration getFreemarkerConfig() {
-		Configuration cfg = new Configuration();
-		ClassLoader classLoader = HtmlMainIndexPage.class.getClassLoader();
-		File file = new File(
-				"/home/tphilipona/projects/schemaspy/schemaspy/src/main/resources/templates");
-
-		try {
-			cfg.setDirectoryForTemplateLoading(file);
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "unable to set Directory for Template Loading" , e);
-		}
-		cfg.setDefaultEncoding("UTF-8");
-		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-		return cfg;
-	}
+	
 
 	public void write(Database database, Collection<Table> tables,
 			Collection<Table> remotes, LineWriter html) throws IOException {
@@ -106,7 +79,7 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 
 		int numTableCols = 0;
 		int numViewCols = 0;
-		long numRows = 0;
+		long numTableRows = 0;
 		
 		for (Table table : tables) {
 			if (table.isView()){
@@ -122,20 +95,30 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 			}else{
 				numViewCols += table.getColumns().size();
 			}
-			numRows += table.getNumRows() > 0 ? table.getNumRows() : 0;
+			numTableRows += table.getNumRows() > 0 ? table.getNumRows() : 0;
 		}
 
 		writeLocalsHeader(database, tables.size() - numViews, numViews,
 				showIds, hasComments, html);
-
-		writeTables(tables, showIds, html, tables.size() - numViews, numViews);
-
-		if (!remotes.isEmpty()) {
-			writeRemoteTables(remotes, showIds, html, 0, 0);
-		}
-
-		writeFooter(html);
+		
+		GlobalData globalData = new GlobalData();
+		globalData.setDatabase(database);
+		globalData.setDisplayNumRows(displayNumRows);
+		
+		MainIndexPageData data = new MainIndexPageData();
+		data.setGlobalData(globalData);
+		data.setTables(tables);
+		data.setRemoteTables(remotes);
+		data.setShowIds(showIds);
+		data.setNumberOfTables(tables.size() - numViews);
+		data.setNumberOfViews(numViews);
+		data.setNumberTableCols(numTableCols);
+		data.setNumberTableRows(numTableRows);
+		data.setNumberViewCols(numViewCols);
+		
+		html.write(writeTables(data));
 	}
+
 
 	private void writeLocalsHeader(Database db, int numberOfTables,
 			int numberOfViews, boolean showIds, boolean hasComments,
@@ -165,107 +148,11 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 		javascript.add("})");
 
 		writeHeader(db, null, null, javascript, html);
-		html.writeln("<table width='100%'>");
-		html.writeln(" <tr><td class='container'>");
-		writeGeneratedOn(db.getConnectTime(), html);
-		html.writeln(" </td></tr>");
-		html.writeln(" <tr>");
-		html.write("  <td class='container'>Database Type: ");
-		html.write(db.getDatabaseProduct());
-		html.writeln("  </td>");
-		html.writeln("  <td class='container' align='right' valign='top' rowspan='3'>");
-		if (sourceForgeLogoEnabled())
-			html.writeln("    <a href='http://sourceforge.net' target='_blank'><img src='http://sourceforge.net/sflogo.php?group_id=137197&amp;type=1' alt='SourceForge.net' border='0' height='31' width='88'></a><br>");
-		html.writeln("    <br>");
-		html.writeln("  </td>");
-		html.writeln(" </tr>");
-		html.writeln(" <tr>");
-		html.write("  <td class='container'>");
-		String xmlName = db.getName();
-		if (db.getSchema() != null)
-			xmlName += '.' + db.getSchema();
-		else if (db.getCatalog() != null)
-			xmlName += '.' + db.getCatalog();
-		html.write("<br><a href='" + xmlName
-				+ ".xml' title='XML Representation'>XML Representation</a>");
-		html.write("<br><a href='insertionOrder.txt' title='Useful for loading data into a database'>Insertion Order</a>&nbsp;");
-		html.write("<a href='deletionOrder.txt' title='Useful for purging data from a database'>Deletion Order</a>");
-		html.writeln("</td>");
-		html.writeln(" </tr>");
-		html.writeln("</table>");
-
-		html.writeln("<div class='indent'>");
-		html.write("<p>");
-		html.write("<b>");
-		if (numberOfViews == 0) {
-			html.writeln("<label for='showTables' style='display:none;'><input type='checkbox' id='showTables' checked></label>");
-		} else if (numberOfTables == 0) {
-			html.writeln("<label for='showViews' style='display:none;'><input type='checkbox' id='showViews' checked></label>");
-		} else {
-			html.write("<label for='showTables'><input type='checkbox' id='showTables' checked>Tables</label>");
-			html.write(" <label for='showViews'><input type='checkbox' id='showViews' checked>Views</label>");
-		}
-
-		html.writeln(" <label for='showComments'><input type=checkbox "
-				+ (hasComments ? "checked " : "")
-				+ "id='showComments'>Comments</label>");
-		html.writeln("</b>");
 	}
 
-	protected void writeTables(Collection<Table> tables, boolean showIds,
-			LineWriter html, int numberOfTables, int numberOfViews) throws IOException {
-		Template temp = cfg.getTemplate("mainindex/template.ftl");
-
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tables", tables);
-		data.put("showIds", showIds);
-		data.put("oneOfMultipleSchemas", Config.getInstance()
-				.isOneOfMultipleSchemas());
-		String link = getAdditionalLinkBase();
-		data.put("additionalLinkBase", link);
-		data.put("displayNumRows", displayNumRows);
-		data.put("numberOfTables", numberOfTables);
-		data.put("numberOfViews", numberOfViews);
-		
-
-		Writer out = new StringWriter();
-		try {
-			temp.process(data, out);
-		} catch (TemplateException e) {
-			logger.log(Level.WARNING, "TemplateException: ", e);
-		}
-		html.write(out.toString());
-
+	protected String writeTables(MainIndexPageData data) throws IOException {
+		return templateService.renderTemplate("mainindex/localTablesTemplate.ftl", data);
 	}
-	
-	protected void writeRemoteTables(Collection<Table> tables, boolean showIds,
-			LineWriter html, int numberOfTables, int numberOfViews) throws IOException {
-		Template temp = cfg.getTemplate("mainindex/remoteTablesTemplate.ftl");
-
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("tables", tables);
-		data.put("showIds", showIds);
-		data.put("oneOfMultipleSchemas", Config.getInstance()
-				.isOneOfMultipleSchemas());
-		String link = getAdditionalLinkBase();
-		data.put("additionalLinkBase", link);
-		data.put("displayNumRows", displayNumRows);
-		
-
-		Writer out = new StringWriter();
-		try {
-			temp.process(data, out);
-		} catch (TemplateException e) {
-			logger.log(Level.WARNING, "TemplateException: ", e);
-		}
-		html.write(out.toString());
-
-	}
-
-	private String getAdditionalLinkBase() {
-		return "https://twiki.puzzle.ch/bin/view/NDBJS";
-	}
-
 
 	@Override
 	protected boolean isMainIndex() {

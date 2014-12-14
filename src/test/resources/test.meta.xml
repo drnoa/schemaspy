@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemaMeta xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://schemaspy.sourceforge.net/xmlschema/2011/02/05/schemaspy.meta.xsd">
+   <comments>
+      AMW DB
+   </comments>
+   <tables>
+      <table name="TAMW_APPSERVERRELATION" comments="test">
+      	<additionalInfos>
+      		<additionalInfo>
+      			<additionalKey>additionalInfoLink</additionalKey>
+      			<additionalInfoValue>http://google.ch</additionalInfoValue>
+      		</additionalInfo>
+      	</additionalInfos>
+      </table>
+   </tables>
+</schemaMeta>

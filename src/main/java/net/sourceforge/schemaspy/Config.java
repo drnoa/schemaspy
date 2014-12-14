@@ -84,6 +84,7 @@ public class Config
     private Integer port;
     private String server;
     private String meta;
+    private String templateDirectory;
     private Pattern tableInclusions;
     private Pattern tableExclusions;
     private Pattern columnExclusions;
@@ -277,6 +278,18 @@ public class Config
         if (meta == null)
             meta = pullParam("-meta");
         return meta;
+    }
+    
+
+    /**
+     * Whit the -template param the freemarker Templates to write the output can be overwritten
+     * 
+     * @return
+     */
+    public String getTemplateDirectory() {
+        if (templateDirectory == null)
+        	templateDirectory = pullParam("-template");
+        return templateDirectory;
     }
 
     public void setDbType(String dbType) {
@@ -1827,6 +1840,12 @@ public class Config
         value = getMeta();
         if (value != null) {
             params.add("-meta");
+            params.add(value);
+        }
+        
+        value = getTemplateDirectory();
+        if (value != null) {
+            params.add("-template");
             params.add(value);
         }
         if (getGraphvizDir() != null) {

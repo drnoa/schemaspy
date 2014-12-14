@@ -47,10 +47,10 @@
 	</#if>
 </td>
 <td class='comment detail'>
-	<#if additionalLinkBase??>
-		<#if table.additionalLink>
-		<a target="new" href="${additionalLinkBase}/${table.name}">Twiki</a>
-		</#if>
+
+<#assign additionalLink = table.getAdditionalInfo('additionalInfoLink')!>
+	<#if additionalLink?has_content>
+		<a target="new" href="${additionalLink}">Twiki</a>
 	</#if>
 </td>
 </tr>
