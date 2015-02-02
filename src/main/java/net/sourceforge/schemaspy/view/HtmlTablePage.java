@@ -24,11 +24,16 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import net.sourceforge.schemaspy.Config;
+import net.sourceforge.schemaspy.model.AdditionalInfo;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.Table;
@@ -48,7 +53,9 @@ import net.sourceforge.schemaspy.util.LineWriter;
 public class HtmlTablePage extends HtmlFormatter {
     private static final HtmlTablePage instance = new HtmlTablePage();
     private int columnCounter = 0;
+    
 
+	
     private final Map<String, String> defaultValueAliases = new HashMap<String, String>();
     {
         defaultValueAliases.put("CURRENT TIMESTAMP", "now"); // DB2
@@ -62,6 +69,7 @@ public class HtmlTablePage extends HtmlFormatter {
      * Singleton: Don't allow instantiation
      */
     private HtmlTablePage() {
+
     }
 
     /**
@@ -90,13 +98,15 @@ public class HtmlTablePage extends HtmlFormatter {
         writeCheckConstraints(table, out);
         writeIndexes(table, out);
         writeView(table, db, out);
+        writeAdditionalInfos(table, out);
         writeDiagram(table, stats, diagramsDir, out);
         writeFooter(out);
 
         return stats;
     }
 
-    private void writeHeader(Table table, boolean hasImplied, LineWriter html) throws IOException {
+
+	private void writeHeader(Table table, boolean hasImplied, LineWriter html) throws IOException {
         html.writeln("<form name='options' action=''>");
         if (hasImplied) {
             html.write(" <label for='implied'><input type=checkbox id='implied'");
@@ -336,6 +346,28 @@ public class HtmlTablePage extends HtmlFormatter {
             out.writeln("</table></div><p>");
         }
     }
+    
+    private void writeAdditionalInfos(Table table, LineWriter out) {
+		
+    		List<AdditionalInfo> additionalInfos = table.getAdditionalInfo();
+	    	if(!additionalInfos.isEmpty()){
+	    		
+	    		
+	    		
+	            try {
+	            	out.writeln("<div class='indent'>");
+					out.writeln("<b>Weiterführende Dokumentation:</b><br/>");
+		            for (AdditionalInfo element : additionalInfos) {
+		            	out.writeln("<a href=\"../"+element.getValue()+"\">Twiki Dokumentation</a><br/>");
+		            }
+		            out.writeln("</div>");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    		}
+    	
+	}
+    
 
     private void writeIndexes(Table table, LineWriter out) throws IOException {
         boolean showId = table.getId() != null;
