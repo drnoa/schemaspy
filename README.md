@@ -2,38 +2,38 @@
 SchemaSpy analyzes database metadata to reverse engineer dynamic Entity Relationship (ER) diagrams. It works with just about any JDBC-compliant database (Oracle/MySQL/DB2/SQL Server/PostgreSQL/Sybase/etc) and can identify Ruby on Rails relationships.
 
 # About schemaspy
-Schemaspy is orginally written by johncurrier (https://sites.google.com/site/johncurrier) and can be found on Sourceforge.
+Schemaspy was orginally written by johncurrier (https://sites.google.com/site/johncurrier) and can be found on Sourceforge.
 http://sourceforge.net/projects/schemaspy/
 http://schemaspy.sourceforge.net/
 
-During a project we startet to extend schemaspy by freemaker templates and we like to share this work here.
+During a project we started to extend schemaspy with Freemarker templates and would like to share our work here.
 
 # Basic Idea
 
-The extended Version of schemaspy allows the user to define the layout of the database analysis report by [Freemarker](http://freemarker.incubator.apache.org/) templates. Previously the layout was completely static and there was no way to set define a custom layout for example a company logo during the generation phase of the reports.
+The extended version of schemaspy allows the user to define the layout of the database analysis report with [Freemarker](http://freemarker.incubator.apache.org/) templates. Previously the layout was completely static and there was no way to define a custom layout for example a company logo during the generation phase of the reports.
 
-All customisation posibilities of the HTML reports were in post processing via a external script or tool.
+All customisation posibilities of the HTML reports were in post processing via an external script or tool.
 
-Additional information can be added to the meta xml to provide properties and facts during the generation of the reports.
+Additional information can be added to the meta xml to provide properties and facts for the generation of the reports.
 
 # Howto
 
 ## Build schemaspy
 
-To build schemasyp from source run 
+To build schemaspy from source run 
 
 ```
 mvn clean package assembly:single
 ```
 
-This generates to jars:
+This generates two jars:
 
 ```
-schemaspy-<verion>.jar
+schemaspy-<version>.jar
 ```
 and
 ```
-schemaspy-<verion>-jar-with-dependencies.jar
+schemaspy-<version>-jar-with-dependencies.jar
 ```
 Including the Freemarker dependency.
 
@@ -44,7 +44,7 @@ java -jar schemaspy-<verion>-jar-with-dependencies.jar -t <driver> -host <HOST> 
 ```
 
 
-## templating
+## Templating
 
 By setting the parameter
 ```
@@ -53,12 +53,12 @@ By setting the parameter
 
 the defined templates can be overwritten with custom templates.
 
-The default templates are available under and work as fallback if the requested template is not available in the passed templatefolder (-template)
+The default templates are used as a fallback if the requested template is not available in the templatefolder (-template)
 ```
 src/main/resources/templates
 ```
 
-## Add additional Metadata Meta.xml
+## Add additional Metadata in Meta.xml
 
 The parameter
 ```
@@ -94,7 +94,7 @@ Those additionalInfos can be defined for each table:
 </schemaMeta>
 ```
 
-The additionalInfos can then be accessed in the template by the method table.getAdditionalInfo('additionalKey'):
+The additionalInfos can then be accessed in the template with the method table.getAdditionalInfo('additionalKey'):
 ```
 <#assign additionalLink = table.getAdditionalInfo('additionalInfoLink')!>
 <#if additionalLink?has_content>
