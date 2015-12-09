@@ -18,10 +18,29 @@ Additional information can be added to the meta xml to provide properties and fa
 
 # Howto
 
+## Build schemaspy
+
+To build schemasyp from source run 
+
+```
+mvn clean package assembly:single
+```
+
+This generates to jars:
+
+```
+schemaspy-<verion>.jar
+```
+and
+```
+schemaspy-<verion>-jar-with-dependencies.jar
+```
+Including the Freemarker dependency.
+
 ## Run schemaspy 
 
 ```
-java -jar schemaSpy_<verion>.jar -t <driver> -host <HOST> -port <PORT> -db <DB> -u <USER> -p <pw> -s <SCHEMA> -o ./output/ -dp <driver>.jar
+java -jar schemaspy-<verion>-jar-with-dependencies.jar -t <driver> -host <HOST> -port <PORT> -db <DB> -u <USER> -p <pw> -s <SCHEMA> -o ./output/ -dp <driver>.jar
 ```
 
 
