@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.xml.ForeignKeyMeta;
 import net.sourceforge.schemaspy.model.xml.TableColumnMeta;
@@ -69,6 +70,7 @@ public class Table implements Comparable<Table> {
     private final static Logger logger = Logger.getLogger(Table.class.getName());
     private final static boolean fineEnabled = logger.isLoggable(Level.FINE);
     private final static boolean finerEnabled = logger.isLoggable(Level.FINER);
+    private List<AdditionalInfo> additionalInfo = new ArrayList<AdditionalInfo>();
 
     /**
      * Construct a table that knows everything about the database table's metadata
@@ -909,7 +911,6 @@ public class Table implements Comparable<Table> {
      * @return
      */
     public ForeignKeyConstraint removeAForeignKeyConstraint() {
-        @SuppressWarnings("hiding")
         final List<TableColumn> columns = getColumns();
         int numParents = 0;
         int numChildren = 0;
@@ -1110,6 +1111,11 @@ public class Table implements Comparable<Table> {
         if (newComments != null) {
             comments = newComments;
         }
+        
+        List<AdditionalInfo> additionalInfo = tableMeta.getAdditionalInfo();
+        if(additionalInfo!= null){
+        	this.additionalInfo = additionalInfo;
+        }
 
         for (TableColumnMeta colMeta : tableMeta.getColumns()) {
             TableColumn col = getColumn(colMeta.getName());
@@ -1244,4 +1250,19 @@ public class Table implements Comparable<Table> {
             return id1.toString().compareToIgnoreCase(id2.toString());
         }
     }
+    
+    public List<AdditionalInfo> getAdditionalInfo() {
+		return additionalInfo;
+	}
+    public String getAdditionalInfo(String key){
+    	if(key != null){
+	    	for (AdditionalInfo info : additionalInfo) {
+				if(key.equals(info.getKey())){
+					return info.getValue();
+				}
+			}
+    	}
+    	return null;
+    }
+
 }

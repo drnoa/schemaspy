@@ -24,11 +24,16 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import net.sourceforge.schemaspy.Config;
+import net.sourceforge.schemaspy.model.AdditionalInfo;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.Table;
@@ -47,8 +52,11 @@ import net.sourceforge.schemaspy.util.LineWriter;
  */
 public class HtmlTablePage extends HtmlFormatter {
     private static final HtmlTablePage instance = new HtmlTablePage();
-    private int columnCounter = 0;
-
+    
+	private TemplateService templateService;
+	private int columnCounter;
+	
+	
     private final Map<String, String> defaultValueAliases = new HashMap<String, String>();
     {
         defaultValueAliases.put("CURRENT TIMESTAMP", "now"); // DB2
@@ -62,6 +70,7 @@ public class HtmlTablePage extends HtmlFormatter {
      * Singleton: Don't allow instantiation
      */
     private HtmlTablePage() {
+    	templateService = TemplateService.getInstance();
     }
 
     /**
@@ -77,35 +86,45 @@ public class HtmlTablePage extends HtmlFormatter {
         File diagramsDir = new File(outputDir, "diagrams");
         boolean hasImplied = generateDots(table, diagramsDir, stats);
 
+        GlobalData globalData = new GlobalData();
+		globalData.setDatabase(db);
+		
+		TablePageData data = new TablePageData();
+        data.setTable(table);
+        data.setGlobalData(globalData);
+        
         writeHeader(db, table, null, out);
-        out.writeln("<table width='100%' border='0'>");
-        out.writeln("<tr valign='top'><td class='container' align='left' valign='top'>");
-        writeHeader(table, hasImplied, out);
-        out.writeln("</td><td class='container' rowspan='2' align='right' valign='top'>");
-        writeLegend(true, out);
-        out.writeln("</td><tr valign='top'><td class='container' align='left' valign='top'>");
-        writeMainTable(table, out);
+        data.setHasImplied(hasImplied);
+
+        data.setCheckShowComments(checkShowComments(table));
+        
+        
+        out.write(writeMainTable(table, data));
+        
+        /*
+        
+        
         writeNumRows(db, table, out);
         out.writeln("</td></tr></table>");
         writeCheckConstraints(table, out);
         writeIndexes(table, out);
         writeView(table, db, out);
+        writeAdditionalInfos(table, out);
         writeDiagram(table, stats, diagramsDir, out);
         writeFooter(out);
-
+*/
+        
+        //out.write(writeTables(data));
+        
+        
         return stats;
     }
 
-    private void writeHeader(Table table, boolean hasImplied, LineWriter html) throws IOException {
-        html.writeln("<form name='options' action=''>");
-        if (hasImplied) {
-            html.write(" <label for='implied'><input type=checkbox id='implied'");
-            if (table.isOrphan(false))
-                html.write(" checked");
-            html.writeln(">Implied relationships</label>");
-        }
-
-        // initially show comments if any of the columns contain comments
+	/*
+	 *  initially show comments if any of the columns contain comments
+	 */
+	private boolean checkShowComments(Table table) throws IOException {
+        
         boolean showCommentsInitially = false;
         for (TableColumn column : table.getColumns()) {
             if (column.getComments() != null) {
@@ -113,34 +132,44 @@ public class HtmlTablePage extends HtmlFormatter {
                 break;
             }
         }
-
-        html.writeln(" <label for='showRelatedCols'><input type=checkbox id='showRelatedCols'>Related columns</label>");
-        html.writeln(" <label for='showConstNames'><input type=checkbox id='showConstNames'>Constraints</label>");
-        html.writeln(" <label for='showComments'><input type=checkbox " + (showCommentsInitially  ? "checked " : "") + "id='showComments'>Comments</label>");
-        html.writeln(" <label for='showLegend'><input type=checkbox checked id='showLegend'>Legend</label>");
-        html.writeln("</form>");
+        return showCommentsInitially;
     }
 
-    public void writeMainTable(Table table, LineWriter out) throws IOException {
-        HtmlColumnsPage.getInstance().writeMainTableHeader(table.getId() != null, null, out);
+    public String writeMainTable(Table table, TablePageData data) throws IOException {
+    	
+    	
+    	
+        //HtmlColumnsPage.getInstance().writeMainTableHeader(table.getId() != null, null, out);
 
-        out.writeln("<tbody valign='top'>");
         Set<TableColumn> primaries = new HashSet<TableColumn>(table.getPrimaryColumns());
         Set<TableColumn> indexedColumns = new HashSet<TableColumn>();
+        
         for (TableIndex index : table.getIndexes()) {
             indexedColumns.addAll(index.getColumns());
         }
 
         boolean showIds = table.getId() != null;
+        data.setShowIds(showIds);
+        data.setIndexes(indexedColumns);
+        data.setPrimaries(primaries);
+        List<TableColumn> columns = table.getColumns();
+		data.setColumns(columns);
+        
+        /** 
         for (TableColumn column : table.getColumns()) {
-            writeColumn(column, null, primaries, indexedColumns, false, showIds, out);
+            writeColumn(column, null, primaries, indexedColumns, false, showIds, data);
+            data
         }
+       
         out.writeln("</tbody>");
         out.writeln("</table>");
+        **/
+    	return(templateService.renderTemplate("tables/localTableTemplate.ftl", data));
     }
 
     public void writeColumn(TableColumn column, String tableName, Set<TableColumn> primaries, Set<TableColumn> indexedColumns, boolean slim, boolean showIds, LineWriter out) throws IOException {
-        boolean even = columnCounter++ % 2 == 0;
+        
+		boolean even = columnCounter++ % 2 == 0;
         if (even)
             out.writeln("<tr class='even'>");
         else
@@ -224,7 +253,7 @@ public class HtmlTablePage extends HtmlFormatter {
         out.writeln("</td>");
         out.writeln("</tr>");
     }
-
+    
     /**
      * Write our relatives
      * @param tableName String
@@ -336,6 +365,28 @@ public class HtmlTablePage extends HtmlFormatter {
             out.writeln("</table></div><p>");
         }
     }
+    
+    private void writeAdditionalInfos(Table table, LineWriter out) {
+		
+    		List<AdditionalInfo> additionalInfos = table.getAdditionalInfo();
+	    	if(!additionalInfos.isEmpty()){
+	    		
+	    		
+	    		
+	            try {
+	            	out.writeln("<div class='indent'>");
+					out.writeln("<b>Weiterführende Dokumentation:</b><br/>");
+		            for (AdditionalInfo element : additionalInfos) {
+		            	out.writeln("<a href=\"../"+element.getValue()+"\">Twiki Dokumentation</a><br/>");
+		            }
+		            out.writeln("</div>");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    		}
+    	
+	}
+    
 
     private void writeIndexes(Table table, LineWriter out) throws IOException {
         boolean showId = table.getId() != null;

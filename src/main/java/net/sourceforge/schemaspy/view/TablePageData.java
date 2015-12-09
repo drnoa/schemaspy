@@ -1,0 +1,79 @@
+package net.sourceforge.schemaspy.view;
+
+import java.util.Collection;
+import java.util.Set;
+
+import net.sourceforge.schemaspy.model.Table;
+import net.sourceforge.schemaspy.model.TableColumn;
+
+
+public class TablePageData {
+	private GlobalData globalData;
+
+	private Table table;
+
+	private boolean hasImplied = false;
+	private boolean checkShowComments = false;
+	private int columnCounter = 0;
+	private boolean showIds = false;
+	
+	private Collection<TableColumn> columns;
+	private Set<TableColumn> indexes;
+	private Set<TableColumn> primaries;
+	
+	public GlobalData getGlobalData() {
+		return globalData;
+	}
+	public void setGlobalData(GlobalData globalData) {
+		this.globalData = globalData;
+	}
+	public Table getTable() {
+		return table;
+	}
+	public void setTable(Table table) {
+		this.table = table;
+	}
+	public void setHasImplied(boolean hasImplied) {
+		this.hasImplied = hasImplied;
+	}
+	public boolean getHasImplied() {
+		return hasImplied;
+	}
+	public boolean getCheckShowComments() {
+		return checkShowComments;
+	}
+	public void setCheckShowComments(boolean checkShowComments) {
+		this.checkShowComments = checkShowComments;
+	}
+	public void setShowIds(boolean showIds) {
+		this.showIds = showIds;
+		
+	}
+	public boolean getShowIds() {
+		return this.showIds;
+	}
+	public int getColumnCounter() {
+		return columnCounter;
+	}
+	public void setColumnCounter(int columnCounter) {
+		this.columnCounter = columnCounter;
+	}
+	public Set<TableColumn> getPrimaries() {
+		return primaries;
+	}
+	public void setPrimaries(Set<TableColumn> primaries) {
+		this.primaries = primaries;
+	}
+	public Set<TableColumn> getIndexes() {
+		return indexes;
+	}
+	public void setIndexes(Set<TableColumn> indexes) {
+		this.indexes = indexes;
+	}
+	public Collection<TableColumn> getColumns() {
+		return columns;
+	}
+	public void setColumns(Collection<TableColumn> columns) {
+		this.columns = columns;
+	}
+}
