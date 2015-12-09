@@ -21,6 +21,9 @@ package net.sourceforge.schemaspy.model.xml;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import net.sourceforge.schemaspy.model.AdditionalInfo;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -38,7 +41,9 @@ public class TableMeta {
     private final List<TableColumnMeta> columns = new ArrayList<TableColumnMeta>();
     private final String remoteCatalog;
     private final String remoteSchema;
-    private static final Logger logger = Logger.getLogger(TableMeta.class.getName());
+    private final List<AdditionalInfo> additionalInfo = new ArrayList<AdditionalInfo>();
+
+	private static final Logger logger = Logger.getLogger(TableMeta.class.getName());
 
     TableMeta(Node tableNode) {
         NamedNodeMap attribs = tableNode.getAttributes();
@@ -72,6 +77,17 @@ public class TableMeta {
             Node colNode = columnNodes.item(i);
             columns.add(new TableColumnMeta(colNode));
         }
+        
+        NodeList additionalInfosNodes = ((Element)tableNode.getChildNodes()).getElementsByTagName("additionalInfos");
+        
+        for (int i = 0; i < additionalInfosNodes.getLength(); ++i) {
+        	NodeList additionalInfoNodes = ((Element)additionalInfosNodes.item(i).getChildNodes()).getElementsByTagName("additionalInfo");
+        	for (int j = 0; j < additionalInfoNodes.getLength(); ++j) {
+        		additionalInfo.add(new AdditionalInfo(additionalInfoNodes.item(j)));
+        	}
+            
+        }
+        
     }
 
     public String getName() {
@@ -93,4 +109,8 @@ public class TableMeta {
     public String getRemoteSchema() {
         return remoteSchema;
     }
+    
+    public List<AdditionalInfo> getAdditionalInfo() {
+		return additionalInfo;
+	}
 }

@@ -25,6 +25,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="column" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="additionalInfos" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="comments" type="xs:string"/>
@@ -49,6 +50,23 @@
             </xs:attribute>
         </xs:complexType>
     </xs:element>
+    <xs:element name="additionalInfos">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="additionalInfo" minOccurs="1" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="additionalInfo">
+        <xs:complexType>
+            <xs:sequence>
+                 <xs:element ref="additionalKey" minOccurs="1" maxOccurs="1"/>
+                 <xs:element ref="additionalInfoValue" minOccurs="1" maxOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="additionalKey" type="xs:string"/>
+    <xs:element name="additionalInfoValue" type="xs:string"/>
     <xs:element name="column">
         <xs:complexType>
         	<xs:sequence>
