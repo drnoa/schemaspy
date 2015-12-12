@@ -1,6 +1,13 @@
 package net.sourceforge.schemaspy.view;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +19,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import freemarker.template.TemplateException;
+
+import static org.junit.Assert.assertEquals;
 
 public class HtmlMainIndexPageTest {
 
@@ -49,9 +58,16 @@ public class HtmlMainIndexPageTest {
 		data.setNumberViewCols(0);
 		
 		// when
-		System.out.println(instance.writeTables(data));
+		String result = instance.writeTables(data);
+
 		//then
-		
+		String expected = readFile("src/test/resources/templates/testtemplates/expectedresults/MainIndexResult1.html");
+		assertEquals(expected, result);
 	}
 
+	private String readFile(String filename) throws IOException {
+		byte[] bytes = Files.readAllBytes(Paths.get(filename));
+
+		return new String(bytes, Charset.forName("UTF-8"));
+	}
 }
