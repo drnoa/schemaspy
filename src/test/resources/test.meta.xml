@@ -4,7 +4,7 @@
       AMW DB
    </comments>
    <tables>
-      <table name="TAMW_APPSERVERRELATION" comments="test">
+      <table name="Table1" comments="test">
       	<additionalInfos>
       		<additionalInfo>
       			<additionalKey>additionalInfoLink</additionalKey>
