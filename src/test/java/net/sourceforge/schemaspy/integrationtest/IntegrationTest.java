@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -50,13 +51,13 @@ public class IntegrationTest {
         argv[10] = "-o";
         argv[11] = "./src/test/resources/testdb/output";
 
-                //java -jar schemaSpy_5.0.0.jar -t orathin -host sitaki.rz.puzzle.ch -port 1521 -db PITC01 -u <USER> -p <pw> -s <SCHEMA> -o ./output/ -dp driver.jar
-
         // when
         Database result = analyzer.analyze(new Config(argv));
 
         // then
         assertNotNull(result);
+        assertEquals(9, result.getTables().size());
+        // TODO also check generated Files under ./src/test/resources/testdb/output
 
     }
 }
