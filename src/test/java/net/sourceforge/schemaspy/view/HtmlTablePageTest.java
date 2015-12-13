@@ -1,6 +1,7 @@
 package net.sourceforge.schemaspy.view;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -31,12 +32,13 @@ public class HtmlTablePageTest {
 		// given
 		HtmlTablePage instance = HtmlTablePage.getInstance();
 		Table table = Mockito.mock(Table.class);
-		Mockito.when(table.getName()).thenReturn("table");
-		Mockito.when(table.getComments()).thenReturn("comments");
+		when(table.getName()).thenReturn("table");
+		when(table.getComments()).thenReturn("comments");
 		
 		
 		GlobalData globalData = new GlobalData();
 		Database database = Mockito.mock(Database.class);
+		when(database.getConnectTime()).thenReturn("time");
 		globalData.setDatabase(database);
 			
 		TablePageData data = new TablePageData();
@@ -49,9 +51,11 @@ public class HtmlTablePageTest {
 		// when
 		String result = instance.writeMainTable(table, data);
 		
-		
 		//then
 		String expected = readFile("src/test/resources/templates/testtemplates/expectedresults/TableResult1.html");
+
+
+
 		assertEquals(expected, result);
 	}
 

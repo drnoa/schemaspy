@@ -16,6 +16,8 @@ public class TablePageData {
 	private boolean checkShowComments = false;
 	private int columnCounter = 0;
 	private boolean showIds = false;
+
+	private boolean showTableNameOnColumnTable = false;
 	
 	private Collection<TableColumn> columns;
 	private Set<TableColumn> indexes;
@@ -75,5 +77,12 @@ public class TablePageData {
 	}
 	public void setColumns(Collection<TableColumn> columns) {
 		this.columns = columns;
+	}
+	public boolean isShowTableNameOnColumnTable() {
+		return showTableNameOnColumnTable;
+	}
+
+	public void setShowTableNameOnColumnTable(boolean showTableNameOnColumnTable) {
+		this.showTableNameOnColumnTable = showTableNameOnColumnTable;
 	}
 }
