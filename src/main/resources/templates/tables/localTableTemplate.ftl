@@ -77,7 +77,7 @@
 	</thead>
 	<tbody>
 		<#list columns as column>
-			<#include "item.ftl" >
+			<#include "tableitem.ftl" >
 		</#list>
 	</tbody>
 </table>

@@ -1,4 +1,4 @@
-<#if columnCounter++ % 2 == 0>
+<#if columnCounter % 2 == 1>
 <tr class='even'>
 <#else>
 <tr class='odd'>
@@ -8,12 +8,16 @@
 		<#if column.id??>${column.id}</#if>
 	</td>
 </#if>
-<#if primaries.contains(column)>
+<#if primaries?seq_contains(column)>
 	<td class='primaryKey' title='Primary Key'>
-<#elseif indexedColumns.contains(column)>
+
+    </td>
+<#elseif indexes?seq_contains(column)>
 	<td class='indexedColumn' title='Indexed'>
+    </td>
 <#else>	
 	<td class='detail'>
+    </td>
 </#if>
 
 
