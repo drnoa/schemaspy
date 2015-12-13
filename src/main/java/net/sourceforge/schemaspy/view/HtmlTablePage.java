@@ -109,8 +109,6 @@ public class HtmlTablePage extends HtmlFormatter {
         writeDiagram(table, stats, diagramsDir, out);
 */
         
-        //out.write(writeTables(data));
-        
         
         return stats;
     }

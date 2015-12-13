@@ -4,7 +4,7 @@
       AMW DB
    </comments>
    <tables>
-      <table name="Table1" comments="test">
+      <table name="author" comments="test">
       	<additionalInfos>
       		<additionalInfo>
       			<additionalKey>additionalInfoLink</additionalKey>

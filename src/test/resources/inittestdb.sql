@@ -33,9 +33,12 @@ create table author (
   firstName varchar(32) not null,
   middleName varchar(32) null,
   lastName varchar(32) not null,
+  email varchar(32) not null,
   primary key (authorId)
 );
 CREATE INDEX lastName ON author(lastName);
+ALTER TABLE author ADD CONSTRAINT EMAIL_UNIQUE UNIQUE(email);
+ALTER TABLE author ADD CONSTRAINT TEST_CONST CHECK  (authorId > 0);
 
 create table book_author (
   isbn bigint,
@@ -268,15 +271,15 @@ insert into borrowed_book values(101, 1, 2, '1999-10-31', '1999-10-31');
 insert into library_branch values(null, 'Central', 8);
 insert into library_branch values(null, 'Central', 7);
 insert into library_branch values(null, 'Central', 5);
-insert into author values(null, 'author1', null, 'author1');
-insert into author values(null, 'author2', null, 'author2');
-insert into author values(null, 'author3', null, 'author3');
-insert into author values(null, 'author4', null, 'author4');
-insert into author values(null, 'author5', null, 'author5');
-insert into author values(null, 'author6', null, 'author6');
-insert into author values(null, 'author7', null, 'author7');
-insert into author values(null, 'author8', null, 'author8');
-insert into author values(null, 'author9', null, 'author9');
+insert into author values(null, 'author1', null, 'author1', 'author1@example.com');
+insert into author values(null, 'author2', null, 'author2', 'author2@example.com');
+insert into author values(null, 'author3', null, 'author3', 'author3@example.com');
+insert into author values(null, 'author4', null, 'author4', 'author4@example.com');
+insert into author values(null, 'author5', null, 'author5', 'author5@example.com');
+insert into author values(null, 'author6', null, 'author6', 'author6@example.com');
+insert into author values(null, 'author7', null, 'author7', 'author7@example.com');
+insert into author values(null, 'author8', null, 'author8', 'author8@example.com');
+insert into author values(null, 'author9', null, 'author9', 'author9@example.com');
 insert into book_author values(101, 1);
 insert into book_author values(101, 2);
 insert into book_author values(102, 3);

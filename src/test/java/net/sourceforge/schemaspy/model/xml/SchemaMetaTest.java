@@ -19,7 +19,7 @@ public class SchemaMetaTest {
         // then
         assertNotNull(test);
         assertEquals(1, test.getTables().size());
-        assertEquals("Table1", test.getTables().get(0).getName());
+        assertEquals("author", test.getTables().get(0).getName());
         assertEquals("test", test.getTables().get(0).getComments());
         assertEquals("additionalInfoLink", test.getTables().get(0).getAdditionalInfo().get(0).getKey());
         assertEquals("http://google.ch", test.getTables().get(0).getAdditionalInfo().get(0).getValue());
