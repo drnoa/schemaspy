@@ -99,8 +99,6 @@ public class Inflection {
         uncountable("fish");
         uncountable("sheep");
 
-        //Collections.reverse(singular);
-        //Collections.reverse(plural);
     }
 
     private final String pattern;
