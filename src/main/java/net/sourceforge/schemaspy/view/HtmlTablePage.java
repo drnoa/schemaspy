@@ -103,15 +103,10 @@ public class HtmlTablePage extends HtmlFormatter {
         
         /*
         
-        
-        writeNumRows(db, table, out);
-        out.writeln("</td></tr></table>");
-        writeCheckConstraints(table, out);
-        writeIndexes(table, out);
+
+        // TODO add to freemarker template
         writeView(table, db, out);
-        writeAdditionalInfos(table, out);
         writeDiagram(table, stats, diagramsDir, out);
-        writeFooter(out);
 */
         
         //out.write(writeTables(data));
@@ -315,103 +310,6 @@ public class HtmlTablePage extends HtmlFormatter {
         }
         if (numColumns > 0) {
             out.writeln("  </table>");
-        }
-    }
-
-    private void writeCheckConstraints(Table table, LineWriter out) throws IOException {
-        Map<String, String> constraints = table.getCheckConstraints();
-        if (constraints != null && !constraints.isEmpty()) {
-            out.writeln("<div class='indent'>");
-            out.writeln("<b>Requirements (check constraints):</b>");
-            out.writeln("<table class='dataTable' border='1' rules='groups'><colgroup><colgroup>");
-            out.writeln("<thead>");
-            out.writeln(" <tr>");
-            out.writeln("  <th>Constraint</th>");
-            out.writeln("  <th class='constraint' style='text-align:left;'>Constraint Name</th>");
-            out.writeln(" </tr>");
-            out.writeln("</thead>");
-            out.writeln("<tbody>");
-            for (String name : constraints.keySet()) {
-                out.writeln(" <tr>");
-                out.write("  <td class='detail'>");
-                out.write(HtmlEncoder.encodeString(constraints.get(name).toString()));
-                out.writeln("</td>");
-                out.write("  <td class='constraint' style='text-align:left;'>");
-                out.write(name);
-                out.writeln("</td>");
-                out.writeln(" </tr>");
-            }
-            out.writeln("</tbody>");
-            out.writeln("</table></div><p>");
-        }
-    }
-    
-
-    private void writeIndexes(Table table, LineWriter out) throws IOException {
-        boolean showId = table.getId() != null;
-        Set<TableIndex> indexes = table.getIndexes();
-        if (indexes != null && !indexes.isEmpty()) {
-            out.writeln("<div class='indent'>");
-            out.writeln("<b>Indexes:</b>");
-            out.writeln("<table class='dataTable' border='1' rules='groups'><colgroup><colgroup><colgroup><colgroup>" + (showId ? "<colgroup>" : ""));
-            out.writeln("<thead>");
-            out.writeln(" <tr>");
-            if (showId)
-                out.writeln("  <th>ID</th>");
-            out.writeln("  <th>Column(s)</th>");
-            out.writeln("  <th>Type</th>");
-            out.writeln("  <th>Sort</th>");
-            out.writeln("  <th class='constraint' style='text-align:left;'>Constraint Name</th>");
-            out.writeln(" </tr>");
-            out.writeln("</thead>");
-            out.writeln("<tbody>");
-
-            indexes = new TreeSet<TableIndex>(indexes); // sort primary keys first
-
-            for (TableIndex index : indexes) {
-                out.writeln(" <tr>");
-
-                if (showId) {
-                    out.write("  <td class='detail' align='right'>");
-                    out.write(String.valueOf(index.getId()));
-                    out.writeln("</td>");
-                }
-
-                if (index.isPrimaryKey())
-                    out.write("  <td class='primaryKey'>");
-                else
-                    out.write("  <td class='indexedColumn'>");
-                String columns = index.getColumnsAsString();
-                if (columns.startsWith("+"))
-                    columns = columns.substring(1);
-                out.write(columns);
-                out.writeln("</td>");
-
-                out.write("  <td class='detail'>");
-                out.write(index.getType());
-                out.writeln("</td>");
-
-                out.write("  <td class='detail' style='text-align:left;'>");
-                Iterator<TableColumn> columnsIter = index.getColumns().iterator();
-                while (columnsIter.hasNext()) {
-                    TableColumn column = columnsIter.next();
-                    if (index.isAscending(column))
-                        out.write("<span title='Ascending'>Asc</span>");
-                    else
-                        out.write("<span title='Descending'>Desc</span>");
-                    if (columnsIter.hasNext())
-                        out.write("/");
-                }
-                out.writeln("</td>");
-
-                out.write("  <td class='constraint' style='text-align:left;'>");
-                out.write(index.getName());
-                out.writeln("</td>");
-                out.writeln(" </tr>");
-            }
-            out.writeln("</tbody>");
-            out.writeln("</table>");
-            out.writeln("</div>");
         }
     }
 

@@ -21,6 +21,9 @@ package net.sourceforge.schemaspy.model;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
+import java.util.TreeSet;
+
 import net.sourceforge.schemaspy.Config;
 
 /**
@@ -62,6 +65,13 @@ public class View extends Table {
     public String getViewSql() {
         return viewSql;
     }
+    public String getViewSqlFormated() {
+        Set<Table> references = new TreeSet<Table>();
+        String formatted = Config.getInstance().getSqlFormatter().format(viewSql, db, references);
+
+        return formatted;
+    }
+
 
     /**
      * Extract the SQL that describes this view from the database

@@ -104,5 +104,74 @@
         <tbody>
 	</div>
 </#if>
+<#if table.indexes?? && table.indexes?has_content>
+    <!-- indexes-->
+    <div class='indent'>
+        <b>Indexes:</b>
+        <table class='dataTable' border='1' rules='groups'>
+            <thead>
+            <tr>
+			<#if showIds>
+                <th>ID</th>
+			</#if>
+                <th>Column(s)</th>
+                <th>Type</th>
+                <th>Sort</th>
+                <th class='constraint' style='text-align:left;'>Constraint Name</th>
+            </tr>
+            </thead>
+            <tbody>
+			<#list table.indexes as index>
+				<tr>
+					<#if showIds>
+                    	<td class='detail' align='right'>
+							<#if index.id??>${index.id}</#if>
+						</td>
+					</#if>
+					<#if index.primaryKey>
+                    <td class='primaryKey'>
+					<#else>
+                    <td class='indexedColumn'>
+					</#if>
+						${index.columnsAsString}
+					</td>
+                    <td class='detail'>
+                    ${index.type}
+                    </td>
+                    <td class='detail' style='text-align:left;'>
+						<#list index.columns as indexColumn>
+							<#if index.isAscending(indexColumn)>
+                                <span title='Ascending'>Asc</span>
+							<#else>
+                                <span title='Descending'>Desc</span>
+							</#if>
+							/
+						</#list>
+					</td>
+                    <td class='constraint' style='text-align:left;'>
+						${index.name}
+					</td>
 
+				</tr>
+			</#list>
+			</tbody>
+        </table>
+    </div>
+</#if>
+<#if table.view && table.viewSql??>
+    <!-- view -->
+    <div class='indent spacer'>
+        <b>View Definition:</b>
+		<pre>${table.viewSqlFormated}</pre>
+	</div>
+</#if>
+<#if table.additionalInfo?? && table.additionalInfo?has_content>
+    <!-- additionalInfo -->
+    <div class='indent'>
+        <b>Additional Info:</b><br/>
+		<#list table.additionalInfo as addInfo>
+            <a href="../${addInfo.value}">Additional Info</a><br/>
+		</#list>
+	</div>
+</#if>
 <#include "../include/footer.ftl" >
