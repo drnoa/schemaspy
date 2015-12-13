@@ -63,7 +63,6 @@
 	<colgroup class='comment'>
 	<thead align='left'>
 		<tr>
-		Column 	Type 	Size 	Nulls 	Auto 	Default 	Children 	Parents
 			<th valign='bottom'>Column</th>
 			<th valign='bottom'>Type</th>
 			<th valign='bottom'>Size</th>
@@ -81,6 +80,29 @@
 		</#list>
 	</tbody>
 </table>
-	
+	<p title='${columns?size} columns'>
+        Table contained ${table.numRows} Rows at ${globalData.database.connectTime}
+	</p>
+
+<#if table.checkConstraints?? && table.checkConstraints?has_content>
+<!-- Check constraints-->
+    <div class='indent'>
+    	<b>Requirements (check constraints):</b>
+        <table class='dataTable' border='1' rules='groups'><colgroup><colgroup>
+        	<thead>
+				<tr>
+                    <th>Constraint</th>
+                    <th class='constraint' style='text-align:left;'>Constraint Name</th>
+                </tr>
+            </thead>
+			<tbody>
+				<#list table.checkConstraints?keys as constraintKey>
+                	<td class='detail'>${table.checkConstraints[constraintKey]}</td>
+                	<td class='constraint' style='text-align:left;'>${constraintKey}</td>
+				</#list>
+			</tbody>
+        <tbody>
+	</div>
+</#if>
 
 <#include "../include/footer.ftl" >

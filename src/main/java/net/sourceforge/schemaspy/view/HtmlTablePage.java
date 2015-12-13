@@ -154,16 +154,7 @@ public class HtmlTablePage extends HtmlFormatter {
         data.setPrimaries(primaries);
         List<TableColumn> columns = table.getColumns();
 		data.setColumns(columns);
-        
-        /** 
-        for (TableColumn column : table.getColumns()) {
-            writeColumn(column, null, primaries, indexedColumns, false, showIds, data);
-            data
-        }
-       
-        out.writeln("</tbody>");
-        out.writeln("</table>");
-        **/
+
     	return(templateService.renderTemplate("tables/localTableTemplate.ftl", data));
     }
 
@@ -327,17 +318,6 @@ public class HtmlTablePage extends HtmlFormatter {
         }
     }
 
-    private void writeNumRows(Database db, Table table, LineWriter out) throws IOException {
-        out.write("<p title='" + table.getColumns().size() + " columns'>");
-        if (displayNumRows && table.getNumRows() >= 0) {
-            out.write("Table contained " + NumberFormat.getIntegerInstance().format(table.getNumRows()) + " rows at ");
-        } else {
-            out.write("Analyzed at ");
-        }
-        out.write(db.getConnectTime());
-        out.writeln("<p/>");
-    }
-
     private void writeCheckConstraints(Table table, LineWriter out) throws IOException {
         Map<String, String> constraints = table.getCheckConstraints();
         if (constraints != null && !constraints.isEmpty()) {
@@ -365,27 +345,6 @@ public class HtmlTablePage extends HtmlFormatter {
             out.writeln("</table></div><p>");
         }
     }
-    
-    private void writeAdditionalInfos(Table table, LineWriter out) {
-		
-    		List<AdditionalInfo> additionalInfos = table.getAdditionalInfo();
-	    	if(!additionalInfos.isEmpty()){
-	    		
-	    		
-	    		
-	            try {
-	            	out.writeln("<div class='indent'>");
-					out.writeln("<b>Weiterführende Dokumentation:</b><br/>");
-		            for (AdditionalInfo element : additionalInfos) {
-		            	out.writeln("<a href=\"../"+element.getValue()+"\">Twiki Dokumentation</a><br/>");
-		            }
-		            out.writeln("</div>");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-    		}
-    	
-	}
     
 
     private void writeIndexes(Table table, LineWriter out) throws IOException {
