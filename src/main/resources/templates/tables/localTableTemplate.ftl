@@ -76,7 +76,13 @@
 	</thead>
 	<tbody>
 		<#list columns as column>
+			<#if (column?index % 2) ==0>
+            <tr class='even'>
+			<#else>
+            <tr class='odd'>
+			</#if>
 			<#include "tableitem.ftl" >
+			</tr>
 		</#list>
 	</tbody>
 </table>

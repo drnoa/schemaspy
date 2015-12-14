@@ -1,8 +1,3 @@
-<#if columnCounter % 2 == 1>
-<tr class='even'>
-<#else>
-<tr class='odd'>
-</#if>
 <#if showIds>
     <td class='detail' align='right'>
 		<#if column.id??>${column.id}</#if>
@@ -52,5 +47,3 @@
 		${table.comments}
 	</#if>
 </td>
-
-</tr>
