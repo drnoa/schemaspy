@@ -14,7 +14,6 @@ public class TablePageData {
 
 	private boolean hasImplied = false;
 	private boolean checkShowComments = false;
-	private int columnCounter = 0;
 	private boolean showIds = false;
 
 	private boolean showTableNameOnColumnTable = false;
@@ -53,12 +52,6 @@ public class TablePageData {
 	}
 	public boolean getShowIds() {
 		return this.showIds;
-	}
-	public int getColumnCounter() {
-		return columnCounter;
-	}
-	public void setColumnCounter(int columnCounter) {
-		this.columnCounter = columnCounter;
 	}
 	public Set<TableColumn> getPrimaries() {
 		return primaries;
