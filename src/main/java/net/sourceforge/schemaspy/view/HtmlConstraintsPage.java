@@ -21,17 +21,12 @@ package net.sourceforge.schemaspy.view;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+
 import net.sourceforge.schemaspy.DbAnalyzer;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.Table;
-import net.sourceforge.schemaspy.model.TableColumn;
-import net.sourceforge.schemaspy.util.HtmlEncoder;
 import net.sourceforge.schemaspy.util.LineWriter;
 
 /**

@@ -71,6 +71,8 @@ public class Table implements Comparable<Table> {
     private final static boolean fineEnabled = logger.isLoggable(Level.FINE);
     private final static boolean finerEnabled = logger.isLoggable(Level.FINER);
     private List<AdditionalInfo> additionalInfo = new ArrayList<AdditionalInfo>();
+    
+    private String orphanDiagramFileName;
 
     /**
      * Construct a table that knows everything about the database table's metadata
@@ -1263,6 +1265,13 @@ public class Table implements Comparable<Table> {
 			}
     	}
     	return null;
+    }
+    
+    public String getOrphanDiagramFileName() {
+        return orphanDiagramFileName;
+    }
+    public void setOrphanDiagramFileName(String orphanDiagramFileName) {
+        this.orphanDiagramFileName = orphanDiagramFileName;
     }
 
 }

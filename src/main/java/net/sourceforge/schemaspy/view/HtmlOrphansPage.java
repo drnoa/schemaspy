@@ -36,11 +36,15 @@ import net.sourceforge.schemaspy.util.LineWriter;
  */
 public class HtmlOrphansPage extends HtmlDiagramFormatter {
     private static HtmlOrphansPage instance = new HtmlOrphansPage();
+    
+    private TemplateService templateService;
+
 
     /**
      * Singleton: Don't allow instantiation
      */
     private HtmlOrphansPage() {
+    	templateService = TemplateService.getInstance();
     }
 
     /**
@@ -51,7 +55,7 @@ public class HtmlOrphansPage extends HtmlDiagramFormatter {
     public static HtmlOrphansPage getInstance() {
         return instance;
     }
-
+    
     public boolean write(Database db, List<Table> orphanTables, File diagramDir, LineWriter html) throws IOException {
         Dot dot = getDot();
         if (dot == null)
@@ -64,61 +68,44 @@ public class HtmlOrphansPage extends HtmlDiagramFormatter {
                 orphansWithImpliedRelationships.add(table);
             }
         }
+        
+        writeHeader(db, null, "Utility Tables", html);
 
-        writeHeader(db, "Utility Tables", !orphansWithImpliedRelationships.isEmpty(), html);
+        StringBuilder maps = new StringBuilder(64 * 1024);
 
-        html.writeln("<a name='diagram'>");
-        try {
-            StringBuilder maps = new StringBuilder(64 * 1024);
+        for (Table table : orphanTables) {
+            String dotBaseFilespec = table.getName();
 
-            for (Table table : orphanTables) {
-                String dotBaseFilespec = table.getName();
+            File dotFile = new File(diagramDir, dotBaseFilespec + ".1degree.dot");
+            File imgFile = new File(diagramDir, dotBaseFilespec + ".1degree." + dot.getFormat());
 
-                File dotFile = new File(diagramDir, dotBaseFilespec + ".1degree.dot");
-                File imgFile = new File(diagramDir, dotBaseFilespec + ".1degree." + dot.getFormat());
-
-                LineWriter dotOut = new LineWriter(dotFile, Config.DOT_CHARSET);
-                DotFormatter.getInstance().writeOrphan(table, dotOut);
-                dotOut.close();
-                try {
-                    maps.append(dot.generateDiagram(dotFile, imgFile));
-                } catch (Dot.DotFailure dotFailure) {
-                    System.err.println(dotFailure);
-                    return false;
-                }
-
-                html.write("  <img src='diagrams/orphans/" + imgFile.getName() + "' usemap='#" + table + "' border='0' alt='' align='top'");
-                if (orphansWithImpliedRelationships.contains(table))
-                    html.write(" class='impliedNotOrphan'");
-                html.writeln(">");
+            LineWriter dotOut = new LineWriter(dotFile, Config.DOT_CHARSET);
+            DotFormatter.getInstance().writeOrphan(table, dotOut);
+            dotOut.close();
+            try {
+                maps.append(dot.generateDiagram(dotFile, imgFile));
+            } catch (Dot.DotFailure dotFailure) {
+                System.err.println(dotFailure);
+                return false;
             }
+            table.setOrphanDiagramFileName(imgFile.getName());
+        } 
+        
+        GlobalData globalData = new GlobalData();
+        globalData.setDatabase(db);
+        OrphansPageData data = new OrphansPageData();
+        data.setGlobalData(globalData);
+        data.setOrphanTables(orphanTables);
+        data.setOrphansWithImpliedRelationships(orphansWithImpliedRelationships);
+        data.setMaps(maps.toString());
 
-            html.write(maps.toString());
-
-            return true;
-        } finally {
-            html.writeln("</a>");
-            writeFooter(html);
-        }
+        html.write(writeOrphans(data));
+        
+        return true;
     }
-
-    private void writeHeader(Database db, String title, boolean hasImpliedRelationships, LineWriter html) throws IOException {
-        writeHeader(db, null, title, html);
-        html.writeln("<table class='container' width='100%'>");
-        html.writeln("<tr><td class='container'>");
-        writeGeneratedOn(db.getConnectTime(), html);
-        html.writeln("</td>");
-        html.writeln("<td class='container' align='right' valign='top' rowspan='2'>");
-        writeLegend(false, html);
-        html.writeln("</td></tr>");
-        html.writeln("<tr><td class='container' align='left' valign='top'>");
-        if (hasImpliedRelationships) {
-            html.writeln("<form action=''>");
-            html.writeln(" <label for='removeImpliedOrphans'><input type=checkbox id='removeImpliedOrphans'>");
-            html.writeln("  Hide tables with implied relationships</label>");
-            html.writeln("</form>");
-        }
-        html.writeln("</td></tr></table>");
+    
+    protected String writeOrphans(OrphansPageData data) throws IOException {
+        return templateService.renderTemplate("orphans/localOrphansTemplate.ftl", data);
     }
 
     @Override
