@@ -41,7 +41,8 @@
             </#if>
             <img src='diagrams/orphans/${orphanTable.orphanDiagramFileName}' usemap='#${orphanTable}' border='0' alt='' align='top' class='${cssStyle}' />
 		</#list>
+        ${maps}
 		</a>
-		${maps}
+
 </div>
 <#include "../include/footer.ftl" >
