@@ -1,6 +1,7 @@
 package net.sourceforge.schemaspy.integrationtest;
 
 import net.sourceforge.schemaspy.Config;
+import net.sourceforge.schemaspy.DbAnalyzer;
 import net.sourceforge.schemaspy.SchemaAnalyzer;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
@@ -9,15 +10,23 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
  */
 public class IntegrationTest {
+
+    private static final String GENERATED_RESULT_BASE_FILE_PATH = "./src/test/resources/testdb/output";
+    private static final String EXPECTED_RESULT_BASE_FILE_PATH = "./src/test/resources/testdb/expectedResult";
+
 
     @Before
     public void setUp() throws ClassNotFoundException, SQLException {
@@ -68,8 +77,21 @@ public class IntegrationTest {
         assertEquals(1, getTableByName(result.getTables(), "AUTHOR").getAdditionalInfo().size());
         assertEquals("http://google.ch", getTableByName(result.getTables(), "AUTHOR").getAdditionalInfo().iterator().next().getValue());
         assertEquals(1, getAmountOrphanTables(result.getTables()));
+        assertEquals(10, DbAnalyzer.getForeignKeyConstraints(result.getTables()).size());
+
+        assertFile("deletionOrder.txt");
+        assertFile("insertionOrder.txt");
+
         // TODO also check generated Files under ./src/test/resources/testdb/output
 
+    }
+
+    private void assertFile(String file) throws IOException {
+        String expected = readFile(EXPECTED_RESULT_BASE_FILE_PATH + "/" + file);
+        String generated = readFile(GENERATED_RESULT_BASE_FILE_PATH + "/" + file);
+        assertNotNull(expected);
+        assertNotEquals("", expected);
+        assertEquals(expected, generated);
     }
 
     private Table getTableByName(Collection<Table> tables, String name){
@@ -89,6 +111,11 @@ public class IntegrationTest {
             }
         }
         return amountOrphan;
+    }
 
+    private String readFile(String filename) throws IOException {
+        byte[] bytes = Files.readAllBytes(Paths.get(filename));
+
+        return new String(bytes, Charset.forName("UTF-8"));
     }
 }
