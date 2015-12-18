@@ -91,6 +91,11 @@ create table borrowed_book (
 CREATE INDEX DueDate ON borrowed_book(DueDate);
 
 
+CREATE VIEW ADDRESSVIEW
+AS
+SELECT * FROM ADDRESS;
+
+
 insert into address values(null, 'Road Road', '', 'Colorado Springs', 'CO', '80920');
 insert into address values(null, 'Road Road', '', 'Colorado Springs', 'CO', '80920');
 insert into address values(null, 'Road Road', '', 'Colorado Springs', 'CO', '80920');
