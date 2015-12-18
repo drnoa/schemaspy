@@ -20,20 +20,14 @@ package net.sourceforge.schemaspy.view;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import net.sourceforge.schemaspy.Config;
-import net.sourceforge.schemaspy.model.AdditionalInfo;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.Table;
@@ -105,7 +99,6 @@ public class HtmlTablePage extends HtmlFormatter {
         
 
         // TODO add to freemarker template
-        writeView(table, db, out);
         writeDiagram(table, stats, diagramsDir, out);
 */
         
@@ -129,10 +122,6 @@ public class HtmlTablePage extends HtmlFormatter {
     }
 
     public String writeMainTable(Table table, TablePageData data) throws IOException {
-    	
-    	
-    	
-        //HtmlColumnsPage.getInstance().writeMainTableHeader(table.getId() != null, null, out);
 
         Set<TableColumn> primaries = new HashSet<TableColumn>(table.getPrimaryColumns());
         Set<TableColumn> indexedColumns = new HashSet<TableColumn>();
@@ -145,8 +134,7 @@ public class HtmlTablePage extends HtmlFormatter {
         data.setShowIds(showIds);
         data.setIndexes(indexedColumns);
         data.setPrimaries(primaries);
-        List<TableColumn> columns = table.getColumns();
-		data.setColumns(columns);
+		data.setColumns(table.getColumns());
 
     	return(templateService.renderTemplate("tables/localTableTemplate.ftl", data));
     }
@@ -308,45 +296,6 @@ public class HtmlTablePage extends HtmlFormatter {
         }
         if (numColumns > 0) {
             out.writeln("  </table>");
-        }
-    }
-
-    private void writeView(Table table, Database db, LineWriter out) throws IOException {
-        String sql;
-        if (table.isView() && (sql = table.getViewSql()) != null) {
-            Map<String, Table> tables = new CaseInsensitiveMap<Table>();
-
-            for (Table t : db.getTables())
-                tables.put(t.getName(), t);
-            for (View v : db.getViews())
-                tables.put(v.getName(), v);
-
-            Set<Table> references = new TreeSet<Table>();
-            String formatted = Config.getInstance().getSqlFormatter().format(sql, db, references);
-
-            out.writeln("<div class='indent spacer'>");
-            out.writeln("  <b>View Definition:</b><br/>");
-            out.writeln(formatted);
-            out.writeln("</div>");
-            out.writeln("<div class='spacer'>&nbsp;</div>");
-
-            if (!references.isEmpty()) {
-                out.writeln("<div class='indent'>");
-                out.writeln("  Possibly Referenced Tables/Views:");
-                out.writeln("  <div class='viewReferences'>");
-                out.write("  ");
-                for (Table t : references) {
-                    out.write("<a href='");
-                    out.write(urlEncode(t.getName()));
-                    out.write(".html'>");
-                    out.write(t.getName());
-                    out.write("</a>&nbsp;");
-                }
-
-                out.writeln("  </div>");
-                out.writeln("</div><p/>");
-            }
-
         }
     }
 

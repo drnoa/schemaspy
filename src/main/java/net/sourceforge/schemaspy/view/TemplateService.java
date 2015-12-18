@@ -83,7 +83,7 @@ public class TemplateService {
 
 		MultiTemplateLoader mtl = new MultiTemplateLoader(loaders);
 
-		Configuration cfg = new Configuration();
+		Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 		cfg.setTemplateLoader(mtl);
 		cfg.setDefaultEncoding("UTF-8");
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);

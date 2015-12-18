@@ -31,7 +31,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.ConsoleHandler;
@@ -43,6 +45,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import net.sourceforge.schemaspy.model.ConnectionFailure;
 import net.sourceforge.schemaspy.model.ConsoleProgressListener;
@@ -73,20 +78,26 @@ import net.sourceforge.schemaspy.view.HtmlRoutinesPage;
 import net.sourceforge.schemaspy.view.HtmlTablePage;
 import net.sourceforge.schemaspy.view.ImageWriter;
 import net.sourceforge.schemaspy.view.StyleSheet;
-import net.sourceforge.schemaspy.view.TextFormatter;
+import net.sourceforge.schemaspy.view.TemplateService;
 import net.sourceforge.schemaspy.view.WriteStats;
 import net.sourceforge.schemaspy.view.XmlTableFormatter;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * @author John Currier
  */
 public class SchemaAnalyzer {
-    private final Logger logger = Logger.getLogger(getClass().getName());
-    private boolean fineEnabled;
+   
 
+	private final Logger logger = Logger.getLogger(getClass().getName());
+    private boolean fineEnabled;
+    
+    private TemplateService templateService;
+
+    public SchemaAnalyzer() {
+		super();
+		this.templateService = TemplateService.getInstance();
+	}
+    
     public Database analyze(Config config) throws SQLException, IOException {
     	// don't render console-based detail unless we're generating HTML (those probably don't have a user watching)
     	// and not already logging fine details (to keep from obfuscating those)
@@ -434,14 +445,16 @@ public class SchemaAnalyzer {
             // side effect is that the RI relationships get trashed
             // also populates the recursiveConstraints collection
             List<Table> orderedTables = orderer.getTablesOrderedByRI(db.getTables(), recursiveConstraints);
-
+            Map<String, List<Table>> data = new HashMap<>();
+            data.put("tables", orderedTables);
+            
             out = new LineWriter(new File(outputDir, "insertionOrder.txt"), 16 * 1024, Config.DOT_CHARSET);
-            TextFormatter.getInstance().write(orderedTables, false, out);
+            out.write(templateService.renderTemplate("general/insertionDeletionOrder.ftl", data));
             out.close();
 
             out = new LineWriter(new File(outputDir, "deletionOrder.txt"), 16 * 1024, Config.DOT_CHARSET);
             Collections.reverse(orderedTables);
-            TextFormatter.getInstance().write(orderedTables, false, out);
+            out.write(templateService.renderTemplate("general/insertionDeletionOrder.ftl", data));
             out.close();
 
             duration = progressListener.finishedGatheringDetails();
