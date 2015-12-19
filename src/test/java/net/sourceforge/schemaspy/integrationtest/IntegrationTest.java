@@ -24,7 +24,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class IntegrationTest {
 
-    private static final String GENERATED_RESULT_BASE_FILE_PATH = "./src/test/resources/testdb/output";
+    private static final String GENERATED_RESULT_BASE_FILE_PATH = "./target/output";
     private static final String EXPECTED_RESULT_BASE_FILE_PATH = "./src/test/resources/integrationtest/expectedResult";
 
 
@@ -34,7 +34,7 @@ public class IntegrationTest {
         DeleteDbFiles.execute("./src/test/resources/testdb", "testdb", true);
 
         Class.forName("org.h2.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:h2:./src/test/resources/testdb/testdb");
+        Connection conn = DriverManager.getConnection("jdbc:h2:file:./src/test/resources/testdb/testdb");
         Statement stat = conn.createStatement();
         // create schema and import base data
         stat.execute("runscript from 'src/test/resources/inittestdb.sql'");
@@ -60,7 +60,7 @@ public class IntegrationTest {
         argv[8] = "-p";
         argv[9] = "";
         argv[10] = "-o";
-        argv[11] = "./src/test/resources/testdb/output";
+        argv[11] = "./target/output";
         argv[12] = "-meta";
         argv[13] = "./src/test/resources/test.meta.xml";
 
