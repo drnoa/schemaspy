@@ -95,6 +95,9 @@ CREATE VIEW ADDRESSVIEW
 AS
 SELECT * FROM ADDRESS;
 
+CREATE ALIAS EX_STORED_PROC FOR "net.sourceforge.schemaspy.integrationtest.ExampleFunction.hello";
+
+
 
 insert into address values(null, 'Road Road', '', 'Colorado Springs', 'CO', '80920');
 insert into address values(null, 'Road Road', '', 'Colorado Springs', 'CO', '80920');
