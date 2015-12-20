@@ -45,11 +45,13 @@ import net.sourceforge.schemaspy.util.LineWriter;
  */
 public class HtmlColumnsPage extends HtmlFormatter {
     private static HtmlColumnsPage instance = new HtmlColumnsPage();
+    private TemplateService templateService;
 
     /**
      * Singleton: Don't allow instantiation
      */
     private HtmlColumnsPage() {
+    	templateService = TemplateService.getInstance();
     }
 
     /**
@@ -143,60 +145,38 @@ public class HtmlColumnsPage extends HtmlFormatter {
                 indexedColumns.addAll(index.getColumns());
             }
         }
+        writeHeader(database, null, "Columns", html);
 
-        writeHeader(database, columns.size(), columnInfo, html);
-
-        HtmlTablePage formatter = HtmlTablePage.getInstance();
-
-        for (TableColumn column : columns) {
-            formatter.writeColumn(column, column.getTable().getName(), primaryColumns, indexedColumns, true, false, html);
-        }
-
-        writeFooter(html);
+        GlobalData globalData = new GlobalData();
+		globalData.setDatabase(database);
+		
+		ColumnsPageData data = new ColumnsPageData();
+		data.setGlobalData(globalData);
+		data.setTableHeader(writeHeader(database, columnInfo));
+		data.setContainsComments(Config.getInstance().getColumnDetails().contains("comments"));
+		data.setNumberOfColumns(columns.size());
+		data.setColumns(columns);
+		data.setIndexes(indexedColumns);
+		data.setPrimaries(primaryColumns);
+        
+		html.write(templateService.renderTemplate("columns/localColumnsTemplate.ftl", data));
     }
 
-    private void writeHeader(Database db, int numberOfColumns, ColumnInfo selectedColumn, LineWriter html) throws IOException {
-        writeHeader(db, null, "Columns", html);
+    private String writeHeader(Database db, ColumnInfo selectedColumn) throws IOException {
 
-        html.writeln("<table width='100%' border='0'>");
-        html.writeln("<tr><td class='container'>");
-        writeGeneratedOn(db.getConnectTime(), html);
-        html.writeln("</td><td class='container' rowspan='2' align='right' valign='top'>");
-        writeLegend(false, false, html);
-        html.writeln("</td></tr>");
-        html.writeln("<tr valign='top'><td class='container' align='left' valign='top'>");
-        html.writeln("<p>");
-        html.writeln("<form name='options' action=''>");
-        if (Config.getInstance().getColumnDetails().contains("comments"))
-            html.writeln(" <label for='showComments'><input type=checkbox id='showComments'>Comments</label>");
-        html.writeln(" <label for='showLegend'><input type=checkbox checked id='showLegend'>Legend</label>");
-        html.writeln("</form>");
-        html.writeln("</table>");
-
-        html.writeln("<div class='indent'>");
-        html.write("<b>");
-        html.write(db.getName());
-        if (db.getSchema() != null) {
-            html.write('.');
-            html.write(db.getSchema());
-        } else if (db.getCatalog() != null) {
-            html.write('.');
-            html.write(db.getCatalog());
-        }
-        html.write(" contains ");
-        html.write(String.valueOf(numberOfColumns));
-        html.write(" columns</b> - click on heading to sort:");
         Collection<Table> tables = db.getTables();
         boolean hasTableIds = tables.size() > 0 && tables.iterator().next().getId() != null;
-        writeMainTableHeader(hasTableIds, selectedColumn, html);
-        html.writeln("<tbody valign='top'>");
+        return writeMainTableHeader(hasTableIds, selectedColumn);
     }
 
-    public void writeMainTableHeader(boolean hasTableIds, ColumnInfo selectedColumn, LineWriter out) throws IOException {
+    public String writeMainTableHeader(boolean hasTableIds, ColumnInfo selectedColumn) throws IOException {
+    	
+    	StringBuilder out = new StringBuilder();
+    	
         boolean onColumnsPage = selectedColumn != null;
         List<String> details = null;
-        out.writeln("<a name='columns'></a>");
-        out.writeln("<table id='columns' class='dataTable' border='1' rules='groups'>");
+        out.append("<a name='columns'></a>");
+        out.append("<table id='columns' class='dataTable' border='1' rules='groups'>");
 
         if (onColumnsPage) {
             details = new ArrayList<String>(Config.getInstance().getColumnDetails());
@@ -205,20 +185,20 @@ public class HtmlColumnsPage extends HtmlFormatter {
 
             for (String detail : details) {
                 if (detail.equals("comments"))
-                    out.writeln("<colgroup class='comment'>");
+                    out.append("<colgroup class='comment'>");
                 else
-                    out.writeln("<colgroup>");
+                    out.append("<colgroup>");
             }
         } else {
             int numCols = hasTableIds ? 9 : 8;
             for (int i = 0; i < numCols; ++i) {
-                out.writeln("<colgroup>");
+                out.append("<colgroup>");
             }
-            out.writeln("<colgroup class='comment'>");
+            out.append("<colgroup class='comment'>");
         }
 
-        out.writeln("<thead align='left'>");
-        out.writeln("<tr>");
+        out.append("<thead align='left'>");
+        out.append("<tr>");
         if (onColumnsPage) {
             Map<String, String> headings = new HashMap<String, String>();
             headings.put("id", getTH(selectedColumn, "ID", null, "right"));
@@ -236,25 +216,26 @@ public class HtmlColumnsPage extends HtmlFormatter {
             // output the headings in the order specified
             if (details != null) {  // redundant, but keeps compiler happy
                 for (String detail : details) {
-                    out.writeln(headings.get(detail));
+                    out.append(headings.get(detail));
                 }
             }
         } else {
             if (hasTableIds)
-                out.writeln(getTH(selectedColumn, "ID", null, "right"));
-            out.writeln(getTH(selectedColumn, "Column", null, null));
-            out.writeln(getTH(selectedColumn, "Type", null, null));
-            out.writeln(getTH(selectedColumn, "Size", null, null));
-            out.writeln(getTH(selectedColumn, "Nulls", "Are nulls allowed?", null));
-            out.writeln(getTH(selectedColumn, "Auto", "Is column automatically updated?", null));
-            out.writeln(getTH(selectedColumn, "Default", "Default value", null));
-            out.writeln(getTH(selectedColumn, "Children", "Columns in tables that reference this column", null));
-            out.writeln(getTH(selectedColumn, "Parents", "Columns in tables that are referenced by this column", null));
-            out.writeln("  <th title='Comments' class='comment'><span class='notSortedByColumn'>Comments</span></th>");
+                out.append(getTH(selectedColumn, "ID", null, "right"));
+            out.append(getTH(selectedColumn, "Column", null, null));
+            out.append(getTH(selectedColumn, "Type", null, null));
+            out.append(getTH(selectedColumn, "Size", null, null));
+            out.append(getTH(selectedColumn, "Nulls", "Are nulls allowed?", null));
+            out.append(getTH(selectedColumn, "Auto", "Is column automatically updated?", null));
+            out.append(getTH(selectedColumn, "Default", "Default value", null));
+            out.append(getTH(selectedColumn, "Children", "Columns in tables that reference this column", null));
+            out.append(getTH(selectedColumn, "Parents", "Columns in tables that are referenced by this column", null));
+            out.append("  <th title='Comments' class='comment'><span class='notSortedByColumn'>Comments</span></th>");
         }
 
-        out.writeln("</tr>");
-        out.writeln("</thead>");
+        out.append("</tr>");
+        out.append("</thead>");
+        return out.toString();
     }
 
     private String getTH(ColumnInfo selectedColumn, String columnName, String title, String align) {

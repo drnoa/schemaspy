@@ -22,10 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
@@ -33,8 +31,6 @@ import net.sourceforge.schemaspy.model.ForeignKeyConstraint;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.model.TableColumn;
 import net.sourceforge.schemaspy.model.TableIndex;
-import net.sourceforge.schemaspy.model.View;
-import net.sourceforge.schemaspy.util.CaseInsensitiveMap;
 import net.sourceforge.schemaspy.util.Dot;
 import net.sourceforge.schemaspy.util.HtmlEncoder;
 import net.sourceforge.schemaspy.util.LineWriter;
@@ -139,6 +135,18 @@ public class HtmlTablePage extends HtmlFormatter {
     	return(templateService.renderTemplate("tables/localTableTemplate.ftl", data));
     }
 
+    /**
+     * TODO The Relatives Part needs to be integrated in the Freemarker Templates
+     * 
+     * @param column
+     * @param tableName
+     * @param primaries
+     * @param indexedColumns
+     * @param slim
+     * @param showIds
+     * @param out
+     * @throws IOException
+     */
     public void writeColumn(TableColumn column, String tableName, Set<TableColumn> primaries, Set<TableColumn> indexedColumns, boolean slim, boolean showIds, LineWriter out) throws IOException {
         
 		boolean even = columnCounter++ % 2 == 0;

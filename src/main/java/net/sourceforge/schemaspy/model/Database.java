@@ -110,6 +110,19 @@ public class Database {
     public String getSchema() {
         return schema;
     }
+    
+    public String getFullName(){
+    	StringBuilder sb = new StringBuilder();
+    	sb.append(getName());
+    	if (getSchema() != null) {
+    		sb.append('.');
+    		sb.append(getSchema());
+        } else if (getCatalog() != null) {
+        	sb.append('.');
+        	sb.append(getCatalog());
+        }
+    	return sb.toString();
+    }
 
     /**
      * Details of the database type that's running under the covers.
