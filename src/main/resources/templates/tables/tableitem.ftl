@@ -5,7 +5,7 @@
 </#if>
 <#if showTableNameOnColumnTable>
 	<td class='detail'>
-		<a href='tables/TODO.html'>Table</a>
+		<a href='tables/${column.table.name}.html'>Table</a>
     </td>
 </#if>
 
@@ -43,7 +43,7 @@
 <!-- TODO Relatives Parents and Children-->
 
 <td class='comment detail'>
-	<#if table.comments??>
-		${table.comments}
+	<#if column.comments??>
+		${column.comments}
 	</#if>
 </td>

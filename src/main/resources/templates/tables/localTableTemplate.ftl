@@ -29,26 +29,11 @@
 		</#if>
 		<label for='showLegend'><input type="checkbox" checked id='showLegend'>Legend</label>
 	</form>
-</td><td class='container' rowspan='2' align='right' valign='top'>		
-        <table class='legend' border='0'>
-       	    <tr>
-        	<td class='dataTable' valign='bottom'>Legend:</td>
-        <#if globalData.sourceForgeLogoEnabled>
-           <td class='container' align='right' valign='top'><a href='http://sourceforge.net' target='_blank'><img src='http://sourceforge.net/sflogo.php?group_id=137197&amp;type=1' alt='SourceForge.net' border='0' height='31' width='88'></a></td>
-        </#if>
-        	</tr>
-        	<tr><td class='container' colspan='2'>
-        		<table class='dataTable' border='1'>
-        			<tbody>
-	        			<tr><td class='primaryKey'>Primary key columns</td></tr>
-	        			<tr><td class='indexedColumn'>Columns with indexes</td></tr>
-		        		<tr class='impliedRelationship'><td class='detail'><span class='impliedRelationship'>Implied relationships</span></td></tr>
-		        		<tr><td class='excludedColumn'>Excluded column relationships</td></tr>
-	            		<tr><td class='legendDetail'>&lt; <em>n</em> &gt; number of related tables</td></tr>
-        			</tbody>
-        		</table>
-        	</td></tr>
-        </table>
+</td><td class='container' rowspan='2' align='right' valign='top'>
+<#assign tableDetails=true>
+<#assign diagramDetails=true>
+<#assign sourceForgeLogoEnabled=globalData.sourceForgeLogoEnabled>
+<#include "../general/legend.ftl" >
 </td><tr valign='top'><td class='container' align='left' valign='top'>
 
 <table class='dataTable' border='1' rules='groups'>
