@@ -77,7 +77,6 @@ public class IntegrationTest {
 
         assertEquals(1, getTableByName(result.getTables(), "AUTHOR").getAdditionalInfo().size());
         assertEquals("http://google.ch", getTableByName(result.getTables(), "AUTHOR").getAdditionalInfo().iterator().next().getValue());
-        assertEquals(1, getAmountOrphanTables(result.getTables()));
         assertEquals(10, DbAnalyzer.getForeignKeyConstraints(result.getTables()).size());
 
         assertFile("deletionOrder.txt");
@@ -102,16 +101,6 @@ public class IntegrationTest {
             }
         }
         return null;
-    }
-
-    private int getAmountOrphanTables(Collection<Table> tables){
-        int amountOrphan = 0;
-        for (Table table : tables) {
-            if(table.isOrphan(true)){
-                amountOrphan ++;
-            }
-        }
-        return amountOrphan;
     }
 
     private String readFile(String filename) throws IOException {
