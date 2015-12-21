@@ -35,11 +35,13 @@ import net.sourceforge.schemaspy.util.LineWriter;
  */
 public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
     private static final HtmlRelationshipsPage instance = new HtmlRelationshipsPage();
+    private TemplateService templateService;
 
     /**
      * Singleton: Don't allow instantiation
      */
     private HtmlRelationshipsPage() {
+        templateService = TemplateService.getInstance();
     }
 
     /**
@@ -73,8 +75,19 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             File largeImpliedDotFile = new File(diagramDir, dotBaseFilespec + ".implied.large.dot");
             File largeImpliedDiagramFile = new File(diagramDir, dotBaseFilespec + ".implied.large." + dot.getFormat());
 
-            writeHeader(db, "All Relationships", hasRealRelationships, hasImpliedRelationships, html);
-            html.writeln("<table width=\"100%\"><tr><td class=\"container\">");
+
+            writeHeader(db, null, "All Relationships", html);
+
+            GlobalData globalData = new GlobalData();
+            globalData.setDatabase(db);
+
+            RelationshipPageData data = new RelationshipPageData();
+            data.setGlobalData(globalData);
+            data.setHasImpliedRelationships(hasImpliedRelationships);
+            data.setHasRealRelationships(hasRealRelationships);
+
+            String header = templateService.renderTemplate("relations/localRelationshipTemplate.ftl", data);
+            html.writeln(header);
 
             if (hasRealRelationships) {
             	listener.graphingSummaryProgressed();
@@ -128,49 +141,6 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             ioExc.printStackTrace();
             return false;
         }
-    }
-
-    private void writeHeader(Database db, String title, boolean hasRealRelationships, boolean hasImpliedRelationships, LineWriter html) throws IOException {
-        writeHeader(db, null, title, html);
-        html.writeln("<table class='container' width='100%'>");
-        html.writeln("<tr><td class='container'>");
-        writeGeneratedOn(db.getConnectTime(), html);
-        html.writeln("</td>");
-        html.writeln("<td class='container' align='right' valign='top' rowspan='2'>");
-        writeLegend(false, html);
-        html.writeln("</td></tr>");
-        if (!hasRealRelationships) {
-            html.writeln("<tr><td class='container' align='left' valign='top'>");
-            if (hasImpliedRelationships) {
-                html.writeln("No 'real' Foreign Key relationships were detected in the schema.<br>");
-                html.writeln("Displayed relationships are implied by a column's name/type/size matching another table's primary key.<p>");
-            }
-            else
-                html.writeln("No relationships were detected in the schema.");
-            html.writeln("</td></tr>");
-        }
-        html.writeln("<tr><td class='container' align='left' valign='top'>");
-
-        html.writeln("<form name='options' action=''>");
-        if (hasImpliedRelationships) {
-            html.write("  <span ");
-            // if no real relationships then hide the 'implied' checkbox and make it 'checked'
-            if (!hasRealRelationships)
-                html.write("style=\"display:none\" ");
-            html.writeln("title=\"Show relationships implied by column name/type/size matching another table's primary key\">");
-            html.write("    <label for='implied'><input type='checkbox' id='implied'" + (hasRealRelationships ? "" : " checked" ) + '>');
-            html.writeln("Implied relationships</label>");
-            html.writeln("  </span>");
-        }
-        if (hasRealRelationships || hasImpliedRelationships) {
-            html.writeln("  <span title=\"By default only columns that are primary keys, foreign keys or indexes are shown\">");
-            html.write("    <label for='showNonKeys'><input type='checkbox' id='showNonKeys'>");
-            html.writeln("All columns</label>");
-            html.writeln("  </span>");
-        }
-        html.writeln("</form>");
-
-        html.writeln("</td></tr></table>");
     }
 
     @Override
