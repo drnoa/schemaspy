@@ -53,9 +53,7 @@ public class HtmlTablePageTest {
 		
 		//then
 		String expected = readFile("src/test/resources/templates/testtemplates/expectedresults/TableResult1.html");
-
-
-
+		
 		assertEquals(expected, result);
 	}
 
