@@ -186,40 +186,8 @@ public class HtmlFormatter {
         return Config.getInstance().isLogoEnabled();
     }
 
-    protected void writeLegend(boolean tableDetails, LineWriter out) throws IOException {
-        writeLegend(tableDetails, true, out);
-    }
 
-    protected void writeLegend(boolean tableDetails, boolean diagramDetails, LineWriter out) throws IOException {
-        out.writeln(" <table class='legend' border='0'>");
-        out.writeln("  <tr>");
-        out.writeln("   <td class='dataTable' valign='bottom'>Legend:</td>");
-        if (sourceForgeLogoEnabled())
-            out.writeln("   <td class='container' align='right' valign='top'><a href='http://sourceforge.net' target='_blank'><img src='http://sourceforge.net/sflogo.php?group_id=137197&amp;type=1' alt='SourceForge.net' border='0' height='31' width='88'></a></td>");
-        out.writeln("  </tr>");
-        out.writeln("  <tr><td class='container' colspan='2'>");
-        out.writeln("   <table class='dataTable' border='1'>");
-        out.writeln("    <tbody>");
-        out.writeln("    <tr><td class='primaryKey'>Primary key columns</td></tr>");
-        out.writeln("    <tr><td class='indexedColumn'>Columns with indexes</td></tr>");
-        if (tableDetails)
-            out.writeln("    <tr class='impliedRelationship'><td class='detail'><span class='impliedRelationship'>Implied relationships</span></td></tr>");
-        // comment this out until I can figure out a clean way to embed image references
-        //out.writeln("    <tr><td class='container'>Arrows go from children (foreign keys)" + (tableDetails ? "<br>" : " ") + "to parents (primary keys)</td></tr>");
-        if (diagramDetails) {
-            out.writeln("    <tr><td class='excludedColumn'>Excluded column relationships</td></tr>");
-            if (!tableDetails)
-                out.writeln("    <tr class='impliedRelationship'><td class='legendDetail'>Dashed lines show implied relationships</td></tr>");
-            out.writeln("    <tr><td class='legendDetail'>&lt; <em>n</em> &gt; number of related tables</td></tr>");
-        }
-        out.writeln("    </tbody>");
-        out.writeln("   </table>");
-        out.writeln("  </td></tr>");
-        out.writeln(" </table>");
-        out.writeln("&nbsp;");
-    }
-
-    protected void writeExcludedColumns(Set<TableColumn> excludedColumns, Table table, LineWriter html) throws IOException {
+    protected String writeExcludedColumns(Set<TableColumn> excludedColumns, Table table) throws IOException {
         Set<TableColumn> notInDiagram;
 
         // diagram INCLUDES relationships directly connected to THIS table's excluded columns
@@ -233,23 +201,25 @@ public class HtmlFormatter {
                 }
             }
         }
+        StringBuilder sb = new StringBuilder();
 
         if (notInDiagram.size() > 0) {
-            html.writeln("<span class='excludedRelationship'>");
-            html.writeln("<br>Excluded from diagram's relationships: ");
+            sb.append("<span class='excludedRelationship'>");
+            sb.append("<br>Excluded from diagram's relationships: ");
             for (TableColumn column : notInDiagram) {
                 if (!column.getTable().equals(table)) {
-                    html.write("<a href=\"" + getPathToRoot() + "tables/");
-                    html.write(urlEncode(column.getTable().getName()));
-                    html.write(".html\">");
-                    html.write(column.getTable().getName());
-                    html.write(".");
-                    html.write(column.getName());
-                    html.writeln("</a>&nbsp;");
+                    sb.append("<a href=\"" + getPathToRoot() + "tables/");
+                    sb.append(urlEncode(column.getTable().getName()));
+                    sb.append(".html\">");
+                    sb.append(column.getTable().getName());
+                    sb.append(".");
+                    sb.append(column.getName());
+                    sb.append("</a>&nbsp;");
                 }
             }
-            html.writeln("</span>");
+            sb.append("</span>");
         }
+        return sb.toString();
     }
 
     protected void writeInvalidGraphvizInstallation(LineWriter html) throws IOException {

@@ -24,7 +24,7 @@
 <#if hasImpliedRelationships>
       <span <#if !hasRealRelationships> style="display:none" </#if>
     title="Show relationships implied by column name/type/size matching another table's primary key">
-        <label for='implied'><input type='checkbox' id='implied' <#if hasRealRelationships> checked="checked"</#if>>
+        <label for='implied'><input type='checkbox' id='implied' <#if !hasRealRelationships> checked="checked"</#if>>
     Implied relationships</label>
       </span>
 </#if>
@@ -34,6 +34,27 @@
     All columns</label>
       </span>
     </#if>
-</form>
-        <table width="100%"><tr><td class="container">
+</form></td></tr></table>
+        <table width="100%">
+            <tr>
+                <td class="container">
+                <#if hasRealRelationships>
+                    ${compactRelationshipsDiagram}
+                    <a name='diagram'><img id='realCompactImg' src='diagrams/summary/${compactRelationshipsDiagramFileName}' usemap='#compactRelationshipsDiagram' class='diagram' border='0' alt=''></a>
+                    ${largeRelationshipsDiagram}
+                    <a name='diagram'><img id='realLargeImg' src='diagrams/summary/${largeRelationshipsDiagramFileName}' usemap='#largeRelationshipsDiagram' class='diagram' border='0' alt=''></a>
+                </#if>
+                <#if hasImpliedRelationships>
+                    ${compactImpliedDiagram}
+                    <a name='diagram'><img id='impliedCompactImg' src='diagrams/summary/${compactImpliedDiagramFileName}' usemap='#compactImpliedRelationshipsDiagram' class='diagram' border='0' alt=''></a>
+                    ${largeImpliedDiagram}
+                    <a name='diagram'><img id='impliedLargeImg' src='diagrams/summary/${largeImpliedDiagramFileName}' usemap='#largeImpliedRelationshipsDiagram' class='diagram' border='0' alt=''></a>
+                </#if>
+                </td>
+            </tr>
+        </table>
+        ${excludedColumns}
+
+
+    <#include "../include/footer.ftl" >
 

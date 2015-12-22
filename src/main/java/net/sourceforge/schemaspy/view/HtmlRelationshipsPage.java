@@ -75,7 +75,6 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             File largeImpliedDotFile = new File(diagramDir, dotBaseFilespec + ".implied.large.dot");
             File largeImpliedDiagramFile = new File(diagramDir, dotBaseFilespec + ".implied.large." + dot.getFormat());
 
-
             writeHeader(db, null, "All Relationships", html);
 
             GlobalData globalData = new GlobalData();
@@ -86,23 +85,19 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             data.setHasImpliedRelationships(hasImpliedRelationships);
             data.setHasRealRelationships(hasRealRelationships);
 
-            String header = templateService.renderTemplate("relations/localRelationshipTemplate.ftl", data);
-            html.writeln(header);
-
             if (hasRealRelationships) {
             	listener.graphingSummaryProgressed();
-
-                html.writeln(dot.generateDiagram(compactRelationshipsDotFile, compactRelationshipsDiagramFile));
-                html.writeln("  <a name='diagram'><img id='realCompactImg' src='diagrams/summary/" + compactRelationshipsDiagramFile.getName() + "' usemap='#compactRelationshipsDiagram' class='diagram' border='0' alt=''></a>");
+                data.setCompactRelationshipsDiagramFileName(compactRelationshipsDiagramFile.getName());
+                data.setCompactRelationshipsDiagram(dot.generateDiagram(compactRelationshipsDotFile, compactRelationshipsDiagramFile));
 
                 // we've run into instances where the first diagrams get generated, but then
                 // dot fails on the second one...try to recover from that scenario 'somewhat'
                 // gracefully
                 try {
                 	listener.graphingSummaryProgressed();
+                    data.setLargeRelationshipsDiagram(dot.generateDiagram(largeRelationshipsDotFile, largeRelationshipsDiagramFile));
+                    data.setLargeRelationshipsDiagramFileName(largeRelationshipsDiagramFile.getName());
 
-                    html.writeln(dot.generateDiagram(largeRelationshipsDotFile, largeRelationshipsDiagramFile));
-                    html.writeln("  <a name='diagram'><img id='realLargeImg' src='diagrams/summary/" + largeRelationshipsDiagramFile.getName() + "' usemap='#largeRelationshipsDiagram' class='diagram' border='0' alt=''></a>");
                 } catch (Dot.DotFailure dotFailure) {
                     System.err.println("dot failed to generate all of the relationships diagrams:");
                     System.err.println(dotFailure);
@@ -113,14 +108,11 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             try {
                 if (hasImpliedRelationships) {
                 	listener.graphingSummaryProgressed();
-
-                    html.writeln(dot.generateDiagram(compactImpliedDotFile, compactImpliedDiagramFile));
-                    html.writeln("  <a name='diagram'><img id='impliedCompactImg' src='diagrams/summary/" + compactImpliedDiagramFile.getName() + "' usemap='#compactImpliedRelationshipsDiagram' class='diagram' border='0' alt=''></a>");
-
+                    data.setCompactImpliedDiagramFileName(compactImpliedDiagramFile.getName());
+                    data.setCompactImpliedDiagram(dot.generateDiagram(compactImpliedDotFile, compactImpliedDiagramFile));
                 	listener.graphingSummaryProgressed();
-
-                    html.writeln(dot.generateDiagram(largeImpliedDotFile, largeImpliedDiagramFile));
-                    html.writeln("  <a name='diagram'><img id='impliedLargeImg' src='diagrams/summary/" + largeImpliedDiagramFile.getName() + "' usemap='#largeImpliedRelationshipsDiagram' class='diagram' border='0' alt=''></a>");
+                    data.setLargeImpliedDiagramFileName(largeImpliedDiagramFile.getName());
+                    data.setLargeImpliedDiagram(dot.generateDiagram(largeImpliedDotFile, largeImpliedDiagramFile));
                 }
             } catch (Dot.DotFailure dotFailure) {
                 System.err.println("dot failed to generate all of the relationships diagrams:");
@@ -129,10 +121,12 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             }
 
         	listener.graphingSummaryProgressed();
-            html.writeln("</td></tr></table>");
-            writeExcludedColumns(excludedColumns, null, html);
 
-            writeFooter(html);
+            // TODO move html to template
+            data.setExcludedColumns(writeExcludedColumns(excludedColumns, null));
+
+            html.writeln(templateService.renderTemplate("relations/localRelationshipTemplate.ftl", data));
+
             return true;
         } catch (Dot.DotFailure dotFailure) {
             System.err.println(dotFailure);
