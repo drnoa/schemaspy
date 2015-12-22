@@ -2,4 +2,5 @@
 .idea/
 schemaspy.iml
 .settings
+.project
 src/test/resources/testdb/
