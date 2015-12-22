@@ -375,7 +375,7 @@ public class HtmlTablePage extends HtmlFormatter {
             html.writeln("<table width='100%' border='0'><tr><td class='container'>");
             if (HtmlTableDiagrammer.getInstance().write(table, diagramsDir, html)) {
                 html.writeln("</td></tr></table>");
-                writeExcludedColumns(stats.getExcludedColumns(), table, html);
+                html.writeln(writeExcludedColumns(stats.getExcludedColumns(), table));
             } else {
                 html.writeln("</td></tr></table><p>");
                 writeInvalidGraphvizInstallation(html);
