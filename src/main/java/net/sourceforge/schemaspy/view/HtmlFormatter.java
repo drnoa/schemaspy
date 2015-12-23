@@ -57,6 +57,7 @@ public class HtmlFormatter {
         out.writeln("  <meta HTTP-EQUIV='Content-Type' CONTENT='text/html; charset=" + Config.getInstance().getCharset() + "'>");
         out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='" + (table == null ? "" : "../") + "jquery.js'></SCRIPT>");
         out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='" + (table == null ? "" : "../") + "schemaSpy.js'></SCRIPT>");
+        out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='" + (table == null ? "" : "../") + "jquery.tablesorter.pager.js'></SCRIPT>");
         if (table != null) {
             out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript'>");
             out.writeln("    table='" + table + "';");

@@ -271,7 +271,8 @@ public class SchemaAnalyzer {
                 ImageWriter.getInstance().writeImages(outputDir);
                 ResourceWriter.getInstance().writeResource("/jquery.js", new File(outputDir, "/jquery.js"));
                 ResourceWriter.getInstance().writeResource("/schemaSpy.js", new File(outputDir, "/schemaSpy.js"));
-
+                ResourceWriter.getInstance().writeResource("/jquery.tablesorter.pager.js", new File(outputDir, "/jquery.tablesorter.pager.js"));
+                
                 progressListener.graphingSummaryProgressed();
 
                 boolean showDetailedTables = tables.size() <= config.getMaxDetailedTables();
