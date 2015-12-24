@@ -46,6 +46,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import net.sourceforge.schemaspy.model.ConnectionFailure;
 import net.sourceforge.schemaspy.model.ConsoleProgressListener;
 import net.sourceforge.schemaspy.model.Database;
@@ -67,6 +70,7 @@ import net.sourceforge.schemaspy.util.ResourceWriter;
 import net.sourceforge.schemaspy.view.DotFormatter;
 import net.sourceforge.schemaspy.view.HtmlAnomaliesPage;
 import net.sourceforge.schemaspy.view.HtmlColumnsPage;
+import net.sourceforge.schemaspy.view.HtmlColumnsPage.ColumnInfo;
 import net.sourceforge.schemaspy.view.HtmlConstraintsPage;
 import net.sourceforge.schemaspy.view.HtmlMainIndexPage;
 import net.sourceforge.schemaspy.view.HtmlOrphansPage;
@@ -78,9 +82,6 @@ import net.sourceforge.schemaspy.view.StyleSheet;
 import net.sourceforge.schemaspy.view.TemplateService;
 import net.sourceforge.schemaspy.view.WriteStats;
 import net.sourceforge.schemaspy.view.XmlTableFormatter;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * @author John Currier
@@ -379,13 +380,11 @@ public class SchemaAnalyzer {
                 out.close();
 
                 progressListener.graphingSummaryProgressed();
-
-                for (HtmlColumnsPage.ColumnInfo columnInfo : HtmlColumnsPage.getInstance().getColumnInfos().values()) {
-                    out = new LineWriter(new File(outputDir, columnInfo.getLocation()), 16 * 1024, config.getCharset());
-                    HtmlColumnsPage.getInstance().write(db, tables, columnInfo, out);
-                    out.close();
-                }
-
+                ColumnInfo columnInfo = HtmlColumnsPage.getInstance().getDefaultColumnInfo();
+                out = new LineWriter(new File(outputDir, columnInfo.getLocation()), 16 * 1024, config.getCharset());
+                HtmlColumnsPage.getInstance().write(db, tables, columnInfo, out);
+                out.close();
+                
                 progressListener.graphingSummaryProgressed();
 
                 out = new LineWriter(new File(outputDir, "routines.html"), 16 * 1024, config.getCharset());

@@ -9,7 +9,6 @@ public class ColumnsPageData {
 	private GlobalData globalData;
 	private boolean containsComments;
 	private int numberOfColumns;
-	private String tableHeader;
 	private boolean showIds = false;
 	private boolean showTableNameOnColumnTable = true;
 	private Collection<TableColumn> columns;
@@ -29,14 +28,6 @@ public class ColumnsPageData {
 	public void setNumberOfColumns(int numberOfColumns) {
 		this.numberOfColumns = numberOfColumns;
 	}
-	public String getTableHeader() {
-		return tableHeader;
-	}
-	public void setTableHeader(String tableHeader) {
-		this.tableHeader = tableHeader;
-	}
-	
-	
 	public GlobalData getGlobalData() {
 		return globalData;
 	}
