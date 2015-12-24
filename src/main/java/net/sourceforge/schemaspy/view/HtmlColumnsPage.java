@@ -24,15 +24,14 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
-import net.sourceforge.schemaspy.model.Table.ByColumnIdComparator;
 import net.sourceforge.schemaspy.model.TableColumn;
 import net.sourceforge.schemaspy.model.TableIndex;
 import net.sourceforge.schemaspy.util.LineWriter;
@@ -62,42 +61,10 @@ public class HtmlColumnsPage extends HtmlFormatter {
     public static HtmlColumnsPage getInstance() {
         return instance;
     }
-
-    /**
-     * Returns details about the columns that are displayed on this page.
-     *
-     * @return
-     */
-    public Map<String, ColumnInfo> getColumnInfos()
-    {
-        // build a collection of all possible column details
-        Map<String, ColumnInfo> avails = new HashMap<String, ColumnInfo>();
-        avails.put("id", new ColumnInfo("Id", new ByColumnIdComparator()));
-        avails.put("table", new ColumnInfo("Table", new ByTableComparator()));
-        avails.put("column", new ColumnInfo("Column", new ByColumnComparator()));
-        avails.put("type", new ColumnInfo("Type", new ByTypeComparator()));
-        avails.put("size", new ColumnInfo("Size", new BySizeComparator()));
-        avails.put("nulls", new ColumnInfo("Nulls", new ByNullableComparator()));
-        avails.put("auto", new ColumnInfo("Auto", new ByAutoUpdateComparator()));
-        avails.put("default", new ColumnInfo("Default", new ByDefaultValueComparator()));
-        avails.put("children", new ColumnInfo("Children", new ByChildrenComparator()));
-        avails.put("parents", new ColumnInfo("Parents", new ByParentsComparator()));
-        avails.put("comments", new ColumnInfo("Comments", new ByCommentsComparator()));
-
-        // now put the ones requested in the order requested
-        // LinkedHashMap maintains insertion order
-        Map<String, ColumnInfo> infos = new LinkedHashMap<String, ColumnInfo>();
-
-        for (String detail : Config.getInstance().getColumnDetails()) {
-            ColumnInfo info = avails.get(detail);
-
-            if (info == null)
-                throw new IllegalArgumentException("Undefined column detail requested: '" + detail + "'. Valid details: " + avails.keySet());
-            infos.put(detail, info);
-        }
-
-        return infos;
-    }
+    
+    public ColumnInfo getDefaultColumnInfo() {
+		return new ColumnInfo("Column", new ByColumnComparator());
+	}
 
     public class ColumnInfo
     {
