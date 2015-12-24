@@ -8,7 +8,7 @@
 		</#if>
         </td></tr>
     </table><br>
-    <table class='dataTable' border='1' rules='groups'>
+    <table id='constraints' class='dataTable' border='1' rules='groups'>
     <colgroup>
         <colgroup>
         <colgroup>

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.Revision;
 import net.sourceforge.schemaspy.model.Database;
@@ -51,13 +52,15 @@ public class HtmlFormatter {
         out.write(getDescription(db, table, text, false));
         out.writeln("</title>");
         out.write("  <link rel=stylesheet href='");
-        if (table != null)
+        if (table != null) {
             out.write("../");
+        }
         out.writeln("schemaSpy.css' type='text/css'>");
         out.writeln("  <meta HTTP-EQUIV='Content-Type' CONTENT='text/html; charset=" + Config.getInstance().getCharset() + "'>");
         out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='" + (table == null ? "" : "../") + "jquery.js'></SCRIPT>");
         out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='" + (table == null ? "" : "../") + "schemaSpy.js'></SCRIPT>");
-        out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='" + (table == null ? "" : "../") + "jquery.tablesorter.pager.js'></SCRIPT>");
+        out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='" + (table == null ? "" : "../")
+                + "jquery.tablesorter.js'></SCRIPT>");
         if (table != null) {
             out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript'>");
             out.writeln("    table='" + table + "';");
@@ -65,8 +68,9 @@ public class HtmlFormatter {
         }
         if (javascript != null) {
             out.writeln("  <SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript'>");
-            for (String line : javascript)
+            for (String line : javascript) {
                 out.writeln("    " + line);
+            }
             out.writeln("  </SCRIPT>");
         }
         out.writeln("</head>");
@@ -77,21 +81,25 @@ public class HtmlFormatter {
         out.writeln(" <tr>");
         out.write("  <td class='heading' valign='middle'>");
         out.write("<span class='header'>");
-        if (table == null)
+        if (table == null) {
             out.write("SchemaSpy Analysis of ");
+        }
         out.write(getDescription(db, table, text, true));
         out.write("</span>");
-        if (table == null && db.getDescription() != null)
+        if (table == null && db.getDescription() != null) {
             out.write("<span class='description'>" + db.getDescription().replace("\\=", "=") + "</span>");
+        }
 
         String comments = table == null ? null : table.getComments();
         if (comments != null) {
             out.write("<div style='padding: 0px 4px;'>");
-            if (encodeComments)
-                for (int i = 0; i < comments.length(); ++i)
+            if (encodeComments) {
+                for (int i = 0; i < comments.length(); ++i) {
                     out.write(HtmlEncoder.encodeToken(comments.charAt(i)));
-            else
+                }
+            } else {
                 out.write(comments);
+            }
             out.writeln("</div><p>");
         }
         out.writeln("</td>");
@@ -122,17 +130,20 @@ public class HtmlFormatter {
         html.writeln("<table id='headerHolder' cellspacing='0' cellpadding='0'><tr><td>");
         html.writeln("<div id='header'>");
         html.writeln(" <ul>");
-        if (config.isOneOfMultipleSchemas())
+        if (config.isOneOfMultipleSchemas()) {
             html.writeln("  <li><a href='" + path + "../index.html' title='All Schemas Evaluated'>Schemas</a></li>");
+        }
         html.writeln("  <li" + (isMainIndex() ? " id='current'" : "") + "><a href='" + path + "index.html' title='All tables and views in the schema'>Tables</a></li>");
         html.writeln("  <li" + (isRelationshipsPage() ? " id='current'" : "") + "><a href='" + path + "relationships.html' title='Diagram of table relationships'>Relationships</a></li>");
-        if (config.hasOrphans())
+        if (config.hasOrphans()) {
             html.writeln("  <li" + (isOrphansPage() ? " id='current'" : "") + "><a href='" + path + "utilities.html' title='View of tables with neither parents nor children'>Utility&nbsp;Tables</a></li>");
+        }
         html.writeln("  <li" + (isConstraintsPage() ? " id='current'" : "") + "><a href='" + path + "constraints.html' title='Useful for diagnosing error messages that just give constraint name or number'>Constraints</a></li>");
         html.writeln("  <li" + (isAnomaliesPage() ? " id='current'" : "") + "><a href='" + path + "anomalies.html' title=\"Things that might not be quite right\">Anomalies</a></li>");
         html.writeln("  <li" + (isColumnsPage() ? " id='current'" : "") + "><a href='" + path + HtmlColumnsPage.getInstance().getColumnInfos().get("column") + "' title=\"All of the columns in the schema\">Columns</a></li>");
-        if (config.hasRoutines())
+        if (config.hasRoutines()) {
             html.writeln("  <li" + (isRoutinesPage() ? " id='current'" : "") + "><a href='" + path + "routines.html' title='Stored Procedures / Functions'>Routines</a></li>");
+        }
         html.writeln("  <li><a href='http://sourceforge.net/donate/index.php?group_id=137197' title='Please help keep SchemaSpy alive' target='_blank'>Donate</a></li>");
         html.writeln(" </ul>");
         html.writeln("</div>");
@@ -142,38 +153,47 @@ public class HtmlFormatter {
     protected String getDescription(Database db, Table table, String text, boolean hoverHelp) {
         StringBuilder description = new StringBuilder();
         if (table != null) {
-            if (table.isView())
+            if (table.isView()) {
                 description.append("View ");
-            else
+            } else {
                 description.append("Table ");
+            }
         }
-        if (hoverHelp)
+        if (hoverHelp) {
             description.append("<span title='Database'>");
+        }
         description.append(db.getName());
-        if (hoverHelp)
+        if (hoverHelp) {
             description.append("</span>");
+        }
         if (db.getSchema() != null) {
             description.append('.');
-            if (hoverHelp)
+            if (hoverHelp) {
                 description.append("<span title='Schema'>");
+            }
             description.append(db.getSchema());
-            if (hoverHelp)
+            if (hoverHelp) {
                 description.append("</span>");
+            }
         } else if (db.getCatalog() != null) {
             description.append('.');
-            if (hoverHelp)
+            if (hoverHelp) {
                 description.append("<span title='Catalog'>");
+            }
             description.append(db.getCatalog());
-            if (hoverHelp)
+            if (hoverHelp) {
                 description.append("</span>");
+            }
         }
         if (table != null) {
             description.append('.');
-            if (hoverHelp)
+            if (hoverHelp) {
                 description.append("<span title='Table'>");
+            }
             description.append(table.getName());
-            if (hoverHelp)
+            if (hoverHelp) {
                 description.append("</span>");
+            }
         }
         if (text != null) {
             description.append(" - ");

@@ -46,9 +46,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import net.sourceforge.schemaspy.model.ConnectionFailure;
 import net.sourceforge.schemaspy.model.ConsoleProgressListener;
 import net.sourceforge.schemaspy.model.Database;
@@ -82,22 +79,25 @@ import net.sourceforge.schemaspy.view.TemplateService;
 import net.sourceforge.schemaspy.view.WriteStats;
 import net.sourceforge.schemaspy.view.XmlTableFormatter;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 /**
  * @author John Currier
  */
 public class SchemaAnalyzer {
-   
+
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
     private boolean fineEnabled;
-    
+
     private TemplateService templateService;
 
     public SchemaAnalyzer() {
 		super();
 		this.templateService = TemplateService.getInstance();
 	}
-    
+
     public Database analyze(Config config) throws SQLException, IOException {
     	// don't render console-based detail unless we're generating HTML (those probably don't have a user watching)
     	// and not already logging fine details (to keep from obfuscating those)
@@ -157,22 +157,26 @@ public class SchemaAnalyzer {
             Properties properties = config.determineDbProperties(config.getDbType());
 
             ConnectionURLBuilder urlBuilder = new ConnectionURLBuilder(config, properties);
-            if (config.getDb() == null)
+            if (config.getDb() == null) {
                 config.setDb(urlBuilder.getConnectionURL());
+            }
 
             if (config.getRemainingParameters().size() != 0) {
                 StringBuilder msg = new StringBuilder("Unrecognized option(s):");
-                for (String remnant : config.getRemainingParameters())
+                for (String remnant : config.getRemainingParameters()) {
                     msg.append(" " + remnant);
+                }
                 logger.warning(msg.toString());
             }
 
             String driverClass = properties.getProperty("driver");
             String driverPath = properties.getProperty("driverPath");
-            if (driverPath == null)
+            if (driverPath == null) {
                 driverPath = "";
-            if (config.getDriverPath() != null)
+            }
+            if (config.getDriverPath() != null) {
                 driverPath = config.getDriverPath() + File.pathSeparator + driverPath;
+            }
 
             Connection connection = getConnection(config, urlBuilder.getConnectionURL(), driverClass, driverPath);
 
@@ -190,8 +194,9 @@ public class SchemaAnalyzer {
                 }
 
                 String schemaSpec = config.getSchemaSpec();
-                if (schemaSpec == null)
+                if (schemaSpec == null) {
                     schemaSpec = properties.getProperty("schemaSpec", ".*");
+                }
                 MultipleSchemaAnalyzer.getInstance().analyze(dbName, meta, schemaSpec, null, args, config);
                 return null;    // no database to return
             }
@@ -205,8 +210,9 @@ public class SchemaAnalyzer {
                     !config.isSchemaDisabled()) {
                 schema = config.getUser();
                 logger.fine("schema not specified for a database that requires one.  using user: '" + schema + "'");
-                if (schema == null)
+                if (schema == null) {
                     throw new InvalidConfigurationException("Either a schema ('-s') or a user ('-u') must be specified");
+                }
                 config.setSchema(schema);
             }
 
@@ -244,8 +250,9 @@ public class SchemaAnalyzer {
 
             if (tables.isEmpty()) {
                 dumpNoTablesMessage(schema, config.getUser(), meta, config.getTableInclusions() != null);
-                if (!config.isOneOfMultipleSchemas()) // don't bail if we're doing the whole enchilada
+                if (!config.isOneOfMultipleSchemas()) {
                     throw new EmptySchemaException();
+                }
             }
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -260,8 +267,9 @@ public class SchemaAnalyzer {
             Element rootNode = document.createElement("database");
             document.appendChild(rootNode);
             DOMUtil.appendAttribute(rootNode, "name", dbName);
-            if (schema != null)
+            if (schema != null) {
                 DOMUtil.appendAttribute(rootNode, "schema", schema);
+            }
             DOMUtil.appendAttribute(rootNode, "type", db.getDatabaseProduct());
 
             if (config.isHtmlGenerationEnabled()) {
@@ -271,8 +279,9 @@ public class SchemaAnalyzer {
                 ImageWriter.getInstance().writeImages(outputDir);
                 ResourceWriter.getInstance().writeResource("/jquery.js", new File(outputDir, "/jquery.js"));
                 ResourceWriter.getInstance().writeResource("/schemaSpy.js", new File(outputDir, "/schemaSpy.js"));
-                ResourceWriter.getInstance().writeResource("/jquery.tablesorter.pager.js", new File(outputDir, "/jquery.tablesorter.pager.js"));
-                
+                ResourceWriter.getInstance().writeResource("/jquery.tablesorter.js",
+                        new File(outputDir, "/jquery.tablesorter.js"));
+
                 progressListener.graphingSummaryProgressed();
 
                 boolean showDetailedTables = tables.size() <= config.getMaxDetailedTables();
@@ -282,8 +291,9 @@ public class SchemaAnalyzer {
                 // based on RoR conventions
                 // note that this is done before 'hasRealRelationships' gets evaluated so
                 // we get a relationships ER diagram
-                if (config.isRailsEnabled())
+                if (config.isRailsEnabled()) {
                     DbAnalyzer.getRailsConstraints(db.getTablesByName());
+                }
 
                 File summaryDir = new File(outputDir, "diagrams/summary");
 
@@ -306,10 +316,11 @@ public class SchemaAnalyzer {
                 // getting implied constraints has a side-effect of associating the parent/child tables, so don't do it
                 // here unless they want that behavior
                 List<ImpliedForeignKeyConstraint> impliedConstraints = null;
-                if (includeImpliedConstraints)
+                if (includeImpliedConstraints) {
                     impliedConstraints = DbAnalyzer.getImpliedConstraints(tables);
-                else
+                } else {
                     impliedConstraints = new ArrayList<ImpliedForeignKeyConstraint>();
+                }
 
                 List<Table> orphans = DbAnalyzer.getOrphans(tables);
                 config.setHasOrphans(!orphans.isEmpty() && Dot.getInstance().isValid());
@@ -391,8 +402,9 @@ public class SchemaAnalyzer {
                 HtmlTablePage tableFormatter = HtmlTablePage.getInstance();
                 for (Table table : tables) {
                 	progressListener.graphingDetailsProgressed(table);
-                    if (fineEnabled)
+                    if (fineEnabled) {
                         logger.fine("Writing details of " + table.getName());
+                    }
 
                     out = new LineWriter(new File(outputDir, "tables/" + table.getName() + ".html"), 24 * 1024, config.getCharset());
                     tableFormatter.write(db, table, outputDir, stats, out);
@@ -415,8 +427,9 @@ public class SchemaAnalyzer {
             String[] unusables = xmlName.split("[:@]");
             xmlName = unusables[unusables.length - 1];
 
-            if (schema != null)
+            if (schema != null) {
                 xmlName += '.' + schema;
+            }
 
             out = new LineWriter(new File(outputDir, xmlName + ".xml"), Config.DOT_CHARSET);
             document.getDocumentElement().normalize();
@@ -448,7 +461,7 @@ public class SchemaAnalyzer {
             List<Table> orderedTables = orderer.getTablesOrderedByRI(db.getTables(), recursiveConstraints);
             Map<String, List<Table>> data = new HashMap<>();
             data.put("tables", orderedTables);
-            
+
             out = new LineWriter(new File(outputDir, "insertionOrder.txt"), 16 * 1024, Config.DOT_CHARSET);
             out.write(templateService.renderTemplate("general/insertionDeletionOrder.ftl", data));
             out.close();
@@ -502,8 +515,9 @@ public class SchemaAnalyzer {
             System.out.println("The user you specified (" + user + ')');
             System.out.println("  might not have rights to read the database metadata.");
             System.out.flush();
-            if (failure != null)    // to appease the compiler
+            if (failure != null) {
                 failure.printStackTrace();
+            }
             return;
         } else if (schema == null || schemas.contains(schema)) {
             System.out.println("The schema exists in the database, but the user you specified (" + user + ')');
@@ -617,17 +631,19 @@ public class SchemaAnalyzer {
             System.err.println(exc); // people don't want to see a stack trace...
             System.err.println();
             System.err.print("Failed to load driver '" + driverClass + "'");
-            if (classpath.isEmpty())
+            if (classpath.isEmpty()) {
                 System.err.println();
-            else
+            } else {
                 System.err.println(" from: " + classpath);
+            }
 
             List<File> invalidClasspathEntries = getMissingFiles(driverPath);
             if (!invalidClasspathEntries.isEmpty()) {
-                if (invalidClasspathEntries.size() == 1)
+                if (invalidClasspathEntries.size() == 1) {
                     System.err.print("This entry doesn't point to a valid file/directory: ");
-                else
+                } else {
                     System.err.print("These entries don't point to valid files/directories: ");
+                }
                 System.err.println(invalidClasspathEntries);
             }
             System.err.println();
@@ -676,8 +692,9 @@ public class SchemaAnalyzer {
         String[] pieces = path.split(File.pathSeparator);
         for (String piece : pieces) {
             File file = new File(piece);
-            if (file.exists())
+            if (file.exists()) {
                 existingUrls.add(file.toURI().toURL());
+            }
         }
 
         return existingUrls;
@@ -696,8 +713,9 @@ public class SchemaAnalyzer {
         String[] pieces = path.split(File.pathSeparator);
         for (String piece : pieces) {
             File file = new File(piece);
-            if (!file.exists())
+            if (!file.exists()) {
                 missingFiles.add(file);
+            }
         }
 
         return missingFiles;

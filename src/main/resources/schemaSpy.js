@@ -95,3 +95,7 @@ $(function(){
     unsync($('#removeImpliedOrphans'), $('.impliedNotOrphan'));
   });
 });
+
+$(document).ready(function() {
+    $("#constraints").tablesorter();
+});
