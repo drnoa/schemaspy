@@ -385,12 +385,6 @@ public class SchemaAnalyzer {
                 HtmlColumnsPage.getInstance().write(db, tables, columnInfo, out);
                 out.close();
                 
-//                for (HtmlColumnsPage.ColumnInfo columnInfo : HtmlColumnsPage.getInstance().getColumnInfos().values()) {
-//                    out = new LineWriter(new File(outputDir, columnInfo.getLocation()), 16 * 1024, config.getCharset());
-//                    HtmlColumnsPage.getInstance().write(db, tables, new ColumnInfo("Id", new ByColumnIdComparator())), out);
-//                    out.close();
-//                }
-
                 progressListener.graphingSummaryProgressed();
 
                 out = new LineWriter(new File(outputDir, "routines.html"), 16 * 1024, config.getCharset());
