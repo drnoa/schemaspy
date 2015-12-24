@@ -30,8 +30,19 @@
         ${numberOfColumns}
          columns</b> - click on heading to sort:
          
-       	${tableHeader}
-        
+         <a name='columns'></a>
+         <table id='columns' class='dataTable sortedDataTable' border='1' rules='groups'>
+         <thead align='left'>
+         <tr>
+         	<th>Table</th>
+			<th>Column</th>
+			<th>Type</th>
+			<th>Size</th>
+			<th title='Are nulls allowed?'>Nulls</th>
+			<th title='Is column automatically updated?'>Auto</th>
+			<th title='Default value'>Default</th>
+         </tr>
+         </thead>
         <tbody valign='top'>
 			<#list columns as column>
 				<#if (column?index % 2) ==0>

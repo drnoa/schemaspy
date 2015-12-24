@@ -17,7 +17,12 @@ body  {
 }
 
 /* background-color must be specified for th to propagate into diagrams */
-th {
+th{
+  background-color: #9BAB96;
+  text-align: left;
+  padding: 0px 4px;
+}
+th.header{
   background-color: #9BAB96;
   text-align: left;
   padding: 0px 4px;
@@ -172,7 +177,7 @@ a:visited {
   color: #183118;
 }
 
-.sortedByColumn {
+.sortedByColumn, .headerSortDown, .headerSortUp {
   background-color: #6C7769;
 }
 
