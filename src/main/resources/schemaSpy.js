@@ -97,6 +97,5 @@ $(function(){
 });
 
 $(document).ready(function() {
-    $("#constraints").tablesorter();
     $(".sortedDataTable").tablesorter();
 });
