@@ -36,7 +36,7 @@
 <#include "../general/legend.ftl" >
 </td><tr valign='top'><td class='container' align='left' valign='top'>
 
-<table class='dataTable' border='1' rules='groups'>
+<table class='dataTable sortedDataTable' border='1' rules='groups'>
 	<colgroup>
 	<colgroup>
 	<colgroup>
