@@ -51,7 +51,7 @@ ${globalData.database.databaseProduct!}
 		</b>
 	</p>
 
-<table class='dataTable' border='1' rules='groups'>
+<table class='dataTable sortedDataTable' border='1' rules='groups'>
 	<colgroup>
 	<colgroup>
 	<colgroup>
@@ -93,18 +93,8 @@ ${globalData.database.databaseProduct!}
 		<#list tables as table>
 			<#include "item.ftl" >
 		</#list>
-		<tr>
-			<td class='detail'>&nbsp;</td>
-			<td class='detail'>&nbsp;</td>
-			<td class='detail'>&nbsp;</td>
-			<td class='detail'>&nbsp;</td>
-			<#if globalData.displayNumRows>
-			<td class='detail'>&nbsp;</td>
-			</#if>
-			<td class='comment detail'>&nbsp;</td>
-			</tr>
-			
-			<tr class='tbl'>
+		<tfoot>	
+		<tr class='tbl'>
 			<td class='detail'><b>${numberOfTables} Tables</b></td>
 			<td class='detail'>&nbsp;</td>
 			<td class='detail'>&nbsp;</td>
@@ -126,13 +116,14 @@ ${globalData.database.databaseProduct!}
 			<td class='comment detail'>&nbsp;</td>
 			<td class='comment detail'>&nbsp;</td>
 		</tr>
+		</tfoot>
 	</tbody>
 </table>
 
 <#if remoteTables?has_content>
 	<p><br><b>Related tables in other schemas</b></p>
 	
-	<table class='dataTable' border='1' rules='groups'>
+	<table class='dataTable sortedDataTable' border='1' rules='groups'>
 		<colgroup>
 		<colgroup>
 		<colgroup>
