@@ -84,6 +84,8 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             data.setGlobalData(globalData);
             data.setHasImpliedRelationships(hasImpliedRelationships);
             data.setHasRealRelationships(hasRealRelationships);
+            data.setExcludedColumns(excludedColumns);
+
 
             if (hasRealRelationships) {
             	listener.graphingSummaryProgressed();
@@ -121,10 +123,7 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             }
 
         	listener.graphingSummaryProgressed();
-
-            // TODO move html to template
-            data.setExcludedColumns(writeExcludedColumns(excludedColumns, null));
-
+            
             html.writeln(templateService.renderTemplate("relations/localRelationshipTemplate.ftl", data));
 
             return true;
