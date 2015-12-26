@@ -1,5 +1,9 @@
 package net.sourceforge.schemaspy.view;
 
+import java.util.Set;
+
+import net.sourceforge.schemaspy.model.TableColumn;
+
 /**
  *
  */
@@ -18,7 +22,7 @@ public class RelationshipPageData {
     private String largeImpliedDiagramFileName;
     private String largeImpliedDiagram;
 
-    private String excludedColumns;
+    private Set<TableColumn> excludedColumns;
 
     public boolean isHasImpliedRelationships() {
         return hasImpliedRelationships;
@@ -110,11 +114,11 @@ public class RelationshipPageData {
         this.largeImpliedDiagram = largeImpliedDiagram;
     }
 
-    public String getExcludedColumns() {
+    public Set<TableColumn> getExcludedColumns() {
         return excludedColumns;
     }
 
-    public void setExcludedColumns(String excludedColumns) {
+    public void setExcludedColumns(Set<TableColumn> excludedColumns) {
         this.excludedColumns = excludedColumns;
     }
 }

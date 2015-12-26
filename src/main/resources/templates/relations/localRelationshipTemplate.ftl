@@ -53,7 +53,9 @@
                 </td>
             </tr>
         </table>
-        ${excludedColumns}
+        <#assign columnsNotInDiagram=excludedColumns>
+        
+        <#include "../columns/excludedColumns.ftl" >
 
 
     <#include "../include/footer.ftl" >
