@@ -3,5 +3,6 @@
 schemaspy.iml
 .settings
 .project
+.classpath
 src/test/resources/testdb/
 /output/
