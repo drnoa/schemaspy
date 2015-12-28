@@ -1,13 +1,17 @@
 <!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN' 'http://www.w3.org/TR/html4/loose.dtd'>
 <html>
 <head>
+<#assign path=''>
+<#if 'table' == currentPageName>
+<#assign path='../'>
+</#if>
 <!-- SchemaSpy rev ${globalData.schemaspyRevision} -->
 <title>SchemaSpy - ${descriptionHeader}</title>
-<link rel=stylesheet href='/schemaSpy.css' type='text/css'>
+<link rel=stylesheet href='${path}schemaSpy.css' type='text/css'>
 <meta HTTP-EQUIV='Content-Type' CONTENT='text/html; charset=${globalData.config.charset}'>
-<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='/jquery.js'></SCRIPT>
-<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='/schemaSpy.js'></SCRIPT>
-<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='/jquery.tablesorter.js'></SCRIPT>
+<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='${path}jquery.js'></SCRIPT>
+<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='${path}schemaSpy.js'></SCRIPT>
+<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript' SRC='${path}jquery.tablesorter.js'></SCRIPT>
 </head>
 <body>
 <table id='headerHolder' cellspacing='0' cellpadding='0'><tr><td>
