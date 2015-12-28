@@ -36,11 +36,13 @@ import net.sourceforge.schemaspy.util.LineWriter;
  */
 public class HtmlRoutinesPage extends HtmlFormatter {
     private static HtmlRoutinesPage instance = new HtmlRoutinesPage();
+    private TemplateService templateService;
 
     /**
      * Singleton: Don't allow instantiation
      */
     private HtmlRoutinesPage() {
+    	templateService = TemplateService.getInstance();
     }
 
     /**
@@ -65,18 +67,13 @@ public class HtmlRoutinesPage extends HtmlFormatter {
     }
 
     private void writeHeader(Database db, Collection<Routine> routines, LineWriter html) throws IOException {
-        writeHeader(db, "Procedures and Functions", html);
-
-        html.writeln("<table width='100%'>");
-        html.writeln(" <tr>");
-        html.write("  <td class='container'>");
-        writeGeneratedOn(db.getConnectTime(), html);
-        html.writeln("  </td>");
-        if (sourceForgeLogoEnabled())
-            html.writeln("  <td class='container' align='right' valign='top' colspan='2'><a href='http://sourceforge.net' target='_blank'><img src='http://sourceforge.net/sflogo.php?group_id=137197&amp;type=1' alt='SourceForge.net' border='0' height='31' width='88'></a></td>");
-        html.writeln(" </tr>");
-        html.writeln(" <tr>");
-        html.writeln("  <td class='container'>");
+        GlobalData globalData = new GlobalData();
+		globalData.setDatabase(db);
+		
+		RoutinePageData data = new RoutinePageData();
+        data.setGlobalData(globalData);
+        
+        html.writeln(templateService.renderTemplate("routines/routinesTemplate.ftl", data));
 
         int numProcs = 0;
         int numFuncs = 0;
