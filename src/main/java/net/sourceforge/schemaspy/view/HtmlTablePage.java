@@ -376,9 +376,16 @@ public class HtmlTablePage extends HtmlFormatter {
                 html.writeln(writeExcludedColumns(stats.getExcludedColumns(), table));
             } else {
                 html.writeln("</td></tr></table><p>");
-                writeInvalidGraphvizInstallation(html);
+                html.writeln(writeInvalidGraphvizInstallation());
             }
         }
+    }
+    
+    private String writeInvalidGraphvizInstallation() throws IOException {
+    	StringBuilder html  = new StringBuilder();
+        html.append("<br>SchemaSpy was unable to generate a diagram of table relationships.");
+        html.append("<br>SchemaSpy requires Graphviz " + Dot.getInstance().getSupportedVersions().substring(4) + " from <a href='http://www.graphviz.org' target='_blank'>www.graphviz.org</a>.");
+        return html.toString();
     }
 
     @Override

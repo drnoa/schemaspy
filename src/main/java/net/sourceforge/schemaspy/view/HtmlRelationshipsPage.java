@@ -55,14 +55,20 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
 
     public boolean write(Database db, File diagramDir, String dotBaseFilespec, boolean hasRealRelationships, boolean hasImpliedRelationships,
     					Set<TableColumn> excludedColumns, ProgressListener listener, LineWriter html) {
-        try {
+        
+    	GlobalData globalData = new GlobalData();
+        globalData.setDatabase(db);
+    	
+    	RelationshipPageData data = new RelationshipPageData();
+        data.setGlobalData(globalData);
+        data.setHasImpliedRelationships(hasImpliedRelationships);
+        data.setHasRealRelationships(hasRealRelationships);
+        data.setExcludedColumns(excludedColumns);
+    	
+    	try {
             Dot dot = getDot();
             if (dot == null) {
-                writeHeader(db, "All Relationships", html);
-                html.writeln("<div class='content'>");
-                writeInvalidGraphvizInstallation(html);
-                html.writeln("</div>");
-                writeFooter(html);
+                html.writeln(templateService.renderTemplate("general/invalidGraphvizInstallation.ftl", data));
                 return false;
             }
 
@@ -74,16 +80,6 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             File compactImpliedDiagramFile = new File(diagramDir, dotBaseFilespec + ".implied.compact." + dot.getFormat());
             File largeImpliedDotFile = new File(diagramDir, dotBaseFilespec + ".implied.large.dot");
             File largeImpliedDiagramFile = new File(diagramDir, dotBaseFilespec + ".implied.large." + dot.getFormat());
-
-            GlobalData globalData = new GlobalData();
-            globalData.setDatabase(db);
-
-            RelationshipPageData data = new RelationshipPageData();
-            data.setGlobalData(globalData);
-            data.setHasImpliedRelationships(hasImpliedRelationships);
-            data.setHasRealRelationships(hasRealRelationships);
-            data.setExcludedColumns(excludedColumns);
-
 
             if (hasRealRelationships) {
             	listener.graphingSummaryProgressed();

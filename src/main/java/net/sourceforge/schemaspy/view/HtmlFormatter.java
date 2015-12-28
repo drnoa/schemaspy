@@ -30,7 +30,6 @@ import net.sourceforge.schemaspy.Revision;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.model.TableColumn;
-import net.sourceforge.schemaspy.util.Dot;
 import net.sourceforge.schemaspy.util.LineWriter;
 
 public class HtmlFormatter {
@@ -207,11 +206,6 @@ public class HtmlFormatter {
             sb.append("</span>");
         }
         return sb.toString();
-    }
-
-    protected void writeInvalidGraphvizInstallation(LineWriter html) throws IOException {
-        html.writeln("<br>SchemaSpy was unable to generate a diagram of table relationships.");
-        html.writeln("<br>SchemaSpy requires Graphviz " + Dot.getInstance().getSupportedVersions().substring(4) + " from <a href='http://www.graphviz.org' target='_blank'>www.graphviz.org</a>.");
     }
 
     protected void writeFooter(LineWriter html) throws IOException {
