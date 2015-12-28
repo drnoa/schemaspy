@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * This Class holds the model for the Contraintpage
  */
-public class ConstraintPageData {
+public class ConstraintPageData implements PageData{
     private GlobalData globalData;
     private List<ForeignKeyConstraint> constraints;
     private List<Table> tables;
@@ -45,4 +45,18 @@ public class ConstraintPageData {
         }
         return false;
     }
+	@Override
+	public String getCurrentPageName() {
+		return "constraints";
+	}
+	@Override
+	public String getDescriptionHeader(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), null, "Constraints", false);
+	}
+	@Override
+	public String getDescriptionContent(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), null, "Constraints", true);
+	}
+	
+	
 }

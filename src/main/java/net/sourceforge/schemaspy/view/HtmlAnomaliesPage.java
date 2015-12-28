@@ -59,7 +59,6 @@ public class HtmlAnomaliesPage extends HtmlFormatter {
     }
 
     public void write(Database database, Collection<Table> tables, List<? extends ForeignKeyConstraint> impliedConstraints, LineWriter html) throws IOException {
-    	writeHeader(database, null, "Anomalies", html);
     	GlobalData globalData = new GlobalData();
 		globalData.setDatabase(database);
 		

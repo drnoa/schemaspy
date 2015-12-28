@@ -108,7 +108,6 @@ public class HtmlColumnsPage extends HtmlFormatter {
                 indexedColumns.addAll(index.getColumns());
             }
         }
-        writeHeader(database, null, "Columns", html);
 
         GlobalData globalData = new GlobalData();
 		globalData.setDatabase(database);

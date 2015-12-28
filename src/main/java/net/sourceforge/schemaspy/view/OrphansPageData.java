@@ -8,7 +8,7 @@ import net.sourceforge.schemaspy.model.Table;
 /**
  * This Class holds the model for the OrphansPage
  */
-public class OrphansPageData {
+public class OrphansPageData implements PageData{
 	private GlobalData globalData;
 	private List<Table> orphanTables;
 	private Set<Table> orphansWithImpliedRelationships;
@@ -39,6 +39,18 @@ public class OrphansPageData {
 	}
 	public String getMaps(){
 		return maps;
+	}
+	@Override
+	public String getCurrentPageName() {
+		return "utilities";
+	}
+	@Override
+	public String getDescriptionHeader(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), null, "Utility Tables", false);
+	}
+	@Override
+	public String getDescriptionContent(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), null, "Utility Tables", true);
 	}
 
 }

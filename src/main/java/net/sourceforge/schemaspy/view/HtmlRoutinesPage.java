@@ -65,7 +65,7 @@ public class HtmlRoutinesPage extends HtmlFormatter {
     }
 
     private void writeHeader(Database db, Collection<Routine> routines, LineWriter html) throws IOException {
-        writeHeader(db, null, "Procedures and Functions", html);
+        writeHeader(db, "Procedures and Functions", html);
 
         html.writeln("<table width='100%'>");
         html.writeln(" <tr>");

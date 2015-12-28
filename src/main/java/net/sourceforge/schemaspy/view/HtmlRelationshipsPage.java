@@ -58,7 +58,7 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
         try {
             Dot dot = getDot();
             if (dot == null) {
-                writeHeader(db, null, "All Relationships", html);
+                writeHeader(db, "All Relationships", html);
                 html.writeln("<div class='content'>");
                 writeInvalidGraphvizInstallation(html);
                 html.writeln("</div>");
@@ -74,8 +74,6 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             File compactImpliedDiagramFile = new File(diagramDir, dotBaseFilespec + ".implied.compact." + dot.getFormat());
             File largeImpliedDotFile = new File(diagramDir, dotBaseFilespec + ".implied.large.dot");
             File largeImpliedDiagramFile = new File(diagramDir, dotBaseFilespec + ".implied.large." + dot.getFormat());
-
-            writeHeader(db, null, "All Relationships", html);
 
             GlobalData globalData = new GlobalData();
             globalData.setDatabase(db);

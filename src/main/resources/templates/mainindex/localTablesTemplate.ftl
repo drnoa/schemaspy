@@ -1,3 +1,25 @@
+<#include "../include/header.ftl" >
+<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript'>
+$(function(){
+		  associate($('#showTables'), $('.tbl'));
+		  associate($('#showViews'),  $('.view'));
+		  jQuery.fn.alternateRowColors = function() {
+		    $('tbody tr:visible').each(function(i) {
+		      if (i % 2 == 0) {
+		        $(this).removeClass('even').addClass('odd');
+		      } else {
+		        $(this).removeClass('odd').addClass('even');
+		      }
+		    });
+		    return this;
+		  };
+		  $('#showTables, #showViews').click(function() {
+		    $('table.dataTable').alternateRowColors();
+		  });
+		  $('table.dataTable').alternateRowColors();
+})
+</SCRIPT>
+
 <table width='100%'>
 <tr><td class='container'>
 <span class='container'>Generated on ${globalData.database.connectTime!}</span>

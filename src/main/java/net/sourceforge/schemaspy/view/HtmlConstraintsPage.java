@@ -56,8 +56,6 @@ public class HtmlConstraintsPage extends HtmlFormatter {
     }
 
     public void write(Database db, List<ForeignKeyConstraint> constraints, Collection<Table> tables, LineWriter html) throws IOException {
-        writeHeader(db, null, "Constraints", html);
-
         GlobalData globalData = new GlobalData();
         globalData.setDatabase(db);
         ConstraintPageData data = new ConstraintPageData();

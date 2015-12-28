@@ -83,13 +83,11 @@ public class HtmlTablePage extends HtmlFormatter {
         data.setTable(table);
         data.setGlobalData(globalData);
         
-        writeHeader(db, table, null, out);
         data.setHasImplied(hasImplied);
-
         data.setCheckShowComments(checkShowComments(table));
-        
-        
         out.write(writeMainTable(table, data));
+        
+        
         
         /*
         

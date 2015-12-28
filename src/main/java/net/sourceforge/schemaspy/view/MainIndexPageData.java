@@ -6,7 +6,7 @@ import java.util.Collection;
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Table;
 
-public class MainIndexPageData {
+public class MainIndexPageData implements PageData{
 	private GlobalData globalData;
 	private boolean showIds;
 	
@@ -76,5 +76,16 @@ public class MainIndexPageData {
 	public boolean isOneOfMultipleSchemas() {
 		return oneOfMultipleSchemas;
 	}
-
+	@Override
+	public String getCurrentPageName() {
+		return "index";
+	}
+	@Override
+	public String getDescriptionHeader(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), null, null, false);
+	}
+	@Override
+	public String getDescriptionContent(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), null, null, true);
+	}
 }

@@ -19,10 +19,8 @@
 package net.sourceforge.schemaspy.view;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.TreeSet;
 
 import net.sourceforge.schemaspy.model.Database;
@@ -75,7 +73,6 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 
 		boolean showIds = false;
 		int numViews = 0;
-		boolean hasComments = false;
 
 		int numTableCols = 0;
 		int numViewCols = 0;
@@ -86,9 +83,6 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 				++numViews;
 			}
 			showIds |= table.getId() != null;
-			if (table.getComments() != null){
-				hasComments = true;
-			}
 			
 			if (!table.isView()){
 				numTableCols += table.getColumns().size();
@@ -97,9 +91,6 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 			}
 			numTableRows += table.getNumRows() > 0 ? table.getNumRows() : 0;
 		}
-
-		writeLocalsHeader(database, tables.size() - numViews, numViews,
-				showIds, hasComments, html);
 		
 		GlobalData globalData = new GlobalData();
 		globalData.setDatabase(database);
@@ -117,37 +108,6 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 		data.setNumberViewCols(numViewCols);
 		
 		html.write(writeTables(data));
-	}
-
-
-	private void writeLocalsHeader(Database db, int numberOfTables,
-			int numberOfViews, boolean showIds, boolean hasComments,
-			LineWriter html) throws IOException {
-		List<String> javascript = new ArrayList<String>();
-
-		// we can't use the hard-coded even odd technique that we use
-		// everywhere else because we're dynamically changing the visibility
-		// of tables/views within the list
-		javascript.add("$(function(){");
-		javascript.add("  associate($('#showTables'), $('.tbl'));");
-		javascript.add("  associate($('#showViews'),  $('.view'));");
-		javascript.add("  jQuery.fn.alternateRowColors = function() {");
-		javascript.add("    $('tbody tr:visible').each(function(i) {");
-		javascript.add("      if (i % 2 == 0) {");
-		javascript.add("        $(this).removeClass('even').addClass('odd');");
-		javascript.add("      } else {");
-		javascript.add("        $(this).removeClass('odd').addClass('even');");
-		javascript.add("      }");
-		javascript.add("    });");
-		javascript.add("    return this;");
-		javascript.add("  };");
-		javascript.add("  $('#showTables, #showViews').click(function() {");
-		javascript.add("    $('table.dataTable').alternateRowColors();");
-		javascript.add("  });");
-		javascript.add("  $('table.dataTable').alternateRowColors();");
-		javascript.add("})");
-
-		writeHeader(db, null, null, javascript, html);
 	}
 
 	protected String writeTables(MainIndexPageData data) throws IOException {

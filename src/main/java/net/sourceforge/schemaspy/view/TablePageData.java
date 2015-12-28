@@ -7,7 +7,7 @@ import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.model.TableColumn;
 
 
-public class TablePageData {
+public class TablePageData implements PageData{
 	private GlobalData globalData;
 
 	private Table table;
@@ -77,5 +77,19 @@ public class TablePageData {
 
 	public void setShowTableNameOnColumnTable(boolean showTableNameOnColumnTable) {
 		this.showTableNameOnColumnTable = showTableNameOnColumnTable;
+	}
+	
+	@Override
+	public String getCurrentPageName() {
+		return "table";
+	}
+	
+	@Override
+	public String getDescriptionHeader(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), table, null, false);
+	}
+	@Override
+	public String getDescriptionContent(){
+		return HtmlFormatter.getDescription(globalData.getDatabase(), table, null, true);
 	}
 }

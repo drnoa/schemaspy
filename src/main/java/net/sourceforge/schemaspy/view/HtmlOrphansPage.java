@@ -68,8 +68,6 @@ public class HtmlOrphansPage extends HtmlDiagramFormatter {
                 orphansWithImpliedRelationships.add(table);
             }
         }
-        
-        writeHeader(db, null, "Utility Tables", html);
 
         StringBuilder maps = new StringBuilder(64 * 1024);
 

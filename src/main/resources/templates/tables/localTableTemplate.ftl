@@ -1,3 +1,8 @@
+<#include "../include/header.ftl" >
+<SCRIPT LANGUAGE='JavaScript' TYPE='text/javascript'>
+            table='${table.name}';
+</SCRIPT>
+
 <table width='100%'>
 <tr><td class='container'>
 <span class='container'>Generated on ${globalData.database.connectTime!}</span>

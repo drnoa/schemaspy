@@ -1,3 +1,4 @@
+<#include "../include/header.ftl" >
 <table class='container' width='100%'>
 <tr><td class='container'>
 <span class='container'>Generated on ${globalData.database.connectTime!}</span>

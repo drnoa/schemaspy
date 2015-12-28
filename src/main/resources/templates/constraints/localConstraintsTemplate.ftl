@@ -1,3 +1,4 @@
+<#include "../include/header.ftl" >
 <div class='indent'>
     <table width='100%'>
     <tr><td class='container' valign='bottom'><b>
