@@ -104,42 +104,6 @@ public class HtmlFormatter {
         return Config.getInstance().isLogoEnabled();
     }
 
-
-    protected String writeExcludedColumns(Set<TableColumn> excludedColumns, Table table) throws IOException {
-        Set<TableColumn> notInDiagram;
-
-        // diagram INCLUDES relationships directly connected to THIS table's excluded columns
-        if (table == null) {
-            notInDiagram = excludedColumns;
-        } else {
-            notInDiagram = new HashSet<TableColumn>();
-            for (TableColumn column : excludedColumns) {
-                if (column.isAllExcluded() || !column.getTable().equals(table)) {
-                    notInDiagram.add(column);
-                }
-            }
-        }
-        StringBuilder sb = new StringBuilder();
-
-        if (notInDiagram.size() > 0) {
-            sb.append("<span class='excludedRelationship'>");
-            sb.append("<br>Excluded from diagram's relationships: ");
-            for (TableColumn column : notInDiagram) {
-                if (!column.getTable().equals(table)) {
-                    sb.append("<a href=\"" + getPathToRoot() + "tables/");
-                    sb.append(urlEncode(column.getTable().getName()));
-                    sb.append(".html\">");
-                    sb.append(column.getTable().getName());
-                    sb.append(".");
-                    sb.append(column.getName());
-                    sb.append("</a>&nbsp;");
-                }
-            }
-            sb.append("</span>");
-        }
-        return sb.toString();
-    }
-
     protected void writeFooter(LineWriter html) throws IOException {
         html.writeln("</div>");
         if (isMetered) {

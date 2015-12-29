@@ -161,6 +161,43 @@
 		<pre>${table.viewSqlFormated}</pre>
 	</div>
 </#if>
+<#if (table.maxChildren + table.maxParents) > 0 >
+<table width='100%' border='0'>
+	<tr>
+		<td class='container'>
+		<#if diagramSuccessful>
+			<br>
+				<form action='get'><b>Close relationships
+				<#if twoDegreesDiagram?? && twoDegreesDiagram?has_content>
+					</b><span class='degrees' id='degrees' title='Detail diminishes with increased separation from ${table.name}'>
+                &nbsp;within <label for='oneDegree'><input type='radio' name='degrees' id='oneDegree' checked>one</label>
+                  <label for='twoDegrees'><input type='radio' name='degrees' id='twoDegrees'>two degrees</label> of separation
+                </span><b>
+				</#if>
+				:</b></form>
+				
+				${oneDegreeDiagram}
+				<a name='diagram'><img id='oneDegreeImg' src='../diagrams/${oneDegreeDiagramName}' usemap='#oneDegreeRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a
+				<#if impliedDiagram?? && impliedDiagram?has_content>
+					${impliedDiagram}
+					<a name='diagram'><img id='impliedTwoDegreesImg' src='../diagrams/${impliedDiagramName}' usemap='#impliedTwoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>
+				</#if>
+				<#if twoDegreesDiagram?? && twoDegreesDiagram?has_content>
+					${twoDegreesDiagram}
+					<a name='diagram'><img id='twoDegreesImg' src='../diagrams/${twoDegreesDiagramName}' usemap='#twoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>
+				</#if>
+			
+			<#assign columnsNotInDiagram=excludedColumns>
+        	<#include "../columns/excludedColumns.ftl" >
+		<#else>
+			<#include "../general/invalidGraphvizInstallation.ftl" >
+		</#if>
+		</td>
+	</tr>
+</table>
+</#if>
+
+
 <#if table.additionalInfo?? && table.additionalInfo?has_content>
     <!-- additionalInfo -->
     <div class='indent'>

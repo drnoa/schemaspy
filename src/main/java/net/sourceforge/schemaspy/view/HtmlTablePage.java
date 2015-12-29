@@ -32,7 +32,6 @@ import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.model.TableColumn;
 import net.sourceforge.schemaspy.model.TableIndex;
 import net.sourceforge.schemaspy.util.Dot;
-import net.sourceforge.schemaspy.util.HtmlEncoder;
 import net.sourceforge.schemaspy.util.LineWriter;
 
 /**
@@ -40,11 +39,10 @@ import net.sourceforge.schemaspy.util.LineWriter;
  *
  * @author John Currier
  */
-public class HtmlTablePage extends HtmlFormatter {
+public class HtmlTablePage extends HtmlDiagramFormatter {
     private static final HtmlTablePage instance = new HtmlTablePage();
     
 	private TemplateService templateService;
-	private int columnCounter;
 	
 	
     private final Map<String, String> defaultValueAliases = new HashMap<String, String>();
@@ -85,17 +83,19 @@ public class HtmlTablePage extends HtmlFormatter {
         
         data.setHasImplied(hasImplied);
         data.setCheckShowComments(checkShowComments(table));
-        out.write(writeMainTable(table, data));
         
+        Set<TableColumn> excludedColumns = new HashSet<TableColumn>();
+        for (TableColumn column : stats.getExcludedColumns()) {
+            if (column.isAllExcluded() || !column.getTable().equals(table)) {
+            	excludedColumns.add(column);
+            }
+        }
         
+        data.setExcludedColumns(excludedColumns);
         
-        /*
-        
+        generateDiagramAndAddToPageData(table, diagramsDir, data);
 
-        // TODO add to freemarker template
-        writeDiagram(table, stats, diagramsDir, out);
-*/
-        
+        out.write(writeMainTable(table, data));
         
         return stats;
     }
@@ -196,24 +196,49 @@ public class HtmlTablePage extends HtmlFormatter {
         return false;
     }
 
-    private void writeDiagram(Table table, WriteStats stats, File diagramsDir, LineWriter html) throws IOException {
+    private void generateDiagramAndAddToPageData(Table table, File diagramsDir, TablePageData data) throws IOException {
         if (table.getMaxChildren() + table.getMaxParents() > 0) {
-            html.writeln("<table width='100%' border='0'><tr><td class='container'>");
-            if (HtmlTableDiagrammer.getInstance().write(table, diagramsDir, html)) {
-                html.writeln("</td></tr></table>");
-                html.writeln(writeExcludedColumns(stats.getExcludedColumns(), table));
-            } else {
-                html.writeln("</td></tr></table><p>");
-                html.writeln(writeInvalidGraphvizInstallation());
-            }
+        	boolean diagramSuccessful = writeDiagram(table, diagramsDir, data);
+        	data.setDiagramSuccessful(diagramSuccessful);
         }
     }
     
-    private String writeInvalidGraphvizInstallation() throws IOException {
-    	StringBuilder html  = new StringBuilder();
-        html.append("<br>SchemaSpy was unable to generate a diagram of table relationships.");
-        html.append("<br>SchemaSpy requires Graphviz " + Dot.getInstance().getSupportedVersions().substring(4) + " from <a href='http://www.graphviz.org' target='_blank'>www.graphviz.org</a>.");
-        return html.toString();
+    private boolean writeDiagram(Table table, File diagramDir, TablePageData data) {
+        try {
+            Dot dot = getDot();
+            if (dot == null)
+                return false;
+
+            File oneDegreeDotFile = new File(diagramDir, table.getName() + ".1degree.dot");
+            File oneDegreeDiagramFile = new File(diagramDir, table.getName() + ".1degree." + dot.getFormat());
+            File twoDegreesDotFile = new File(diagramDir, table.getName() + ".2degrees.dot");
+            File twoDegreesDiagramFile = new File(diagramDir, table.getName() + ".2degrees." + dot.getFormat());
+            File impliedDotFile = new File(diagramDir, table.getName() + ".implied2degrees.dot");
+            File impliedDiagramFile = new File(diagramDir, table.getName() + ".implied2degrees." + dot.getFormat());
+            
+            data.oneDegreeDiagram = dot.generateDiagram(oneDegreeDotFile, oneDegreeDiagramFile);
+            data.oneDegreeDiagramName = urlEncode(oneDegreeDiagramFile.getName());
+
+            if (impliedDotFile.exists()) {
+            	data.impliedDiagram = dot.generateDiagram(impliedDotFile, impliedDiagramFile);
+                data.impliedDiagramName = urlEncode(impliedDiagramFile.getName());
+            } else {
+                impliedDotFile.delete();
+                impliedDiagramFile.delete();
+            }
+            if (twoDegreesDotFile.exists()) {
+            	data.twoDegreesDiagram = dot.generateDiagram(twoDegreesDotFile, twoDegreesDiagramFile);
+                data.twoDegreesDiagramName = urlEncode(twoDegreesDiagramFile.getName());
+            } else {
+                twoDegreesDotFile.delete();
+                twoDegreesDiagramFile.delete();
+            }
+        } catch (Dot.DotFailure dotFailure) {
+            System.err.println(dotFailure);
+            return false;
+        }
+
+        return true;
     }
 
     @Override

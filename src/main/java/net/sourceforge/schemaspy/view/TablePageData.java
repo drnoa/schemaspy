@@ -18,9 +18,20 @@ public class TablePageData implements PageData{
 
 	private boolean showTableNameOnColumnTable = false;
 	
+	private boolean diagramSuccessful;
+	
 	private Collection<TableColumn> columns;
 	private Set<TableColumn> indexes;
 	private Set<TableColumn> primaries;
+	
+	private Set<TableColumn> excludedColumns;
+
+	public String oneDegreeDiagram;
+	public String oneDegreeDiagramName;
+	public String twoDegreesDiagram;
+	public String twoDegreesDiagramName;
+	public String impliedDiagram;
+	public String impliedDiagramName;
 	
 	public GlobalData getGlobalData() {
 		return globalData;
@@ -77,6 +88,18 @@ public class TablePageData implements PageData{
 
 	public void setShowTableNameOnColumnTable(boolean showTableNameOnColumnTable) {
 		this.showTableNameOnColumnTable = showTableNameOnColumnTable;
+	}
+	public boolean isDiagramSuccessful() {
+		return diagramSuccessful;
+	}
+	public void setDiagramSuccessful(boolean diagramSuccessful) {
+		this.diagramSuccessful = diagramSuccessful;
+	}
+	public Set<TableColumn> getExcludedColumns() {
+		return excludedColumns;
+	}
+	public void setExcludedColumns(Set<TableColumn> excludedColumns) {
+		this.excludedColumns = excludedColumns;
 	}
 	
 	@Override
