@@ -1,3 +1,4 @@
+<tr class='${evenOddStr}'>
 <#if showIds>
     <td class='detail' align='right'>
 		<#if column.id??>${column.id}</#if>
@@ -40,10 +41,19 @@
     <td class='detail' align='right'>
 		<#if column.defaultValue??>${column.defaultValue}</#if>
     </td>
-<!-- TODO Relatives Parents and Children-->
-
+<#if showRelatives>
+<td class='detail'>
+<#assign dumpParents=false>
+<#include "relativesitem.ftl" >
+</td>
+<td class='detail'>
+<#assign dumpParents=true>
+<#include "relativesitem.ftl" >
+</td>
+</#if>
 <td class='comment detail'>
 	<#if column.comments??>
 		${column.comments}
 	</#if>
 </td>
+</tr>

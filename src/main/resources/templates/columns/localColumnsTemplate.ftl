@@ -47,12 +47,12 @@
         <tbody valign='top'>
 			<#list columns as column>
 				<#if (column?index % 2) ==0>
-	            <tr class='even'>
+					<#assign evenOddStr='even'>
 				<#else>
-	            <tr class='odd'>
+					<#assign evenOddStr='odd'>
 				</#if>
+				<#assign showRelatives=false>
 				<#include "../tables/tableitem.ftl" >
-			</tr>
 		</#list>
         </tbody>
         </table>
