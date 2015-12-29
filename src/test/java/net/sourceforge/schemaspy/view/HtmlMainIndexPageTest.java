@@ -1,26 +1,21 @@
 package net.sourceforge.schemaspy.view;
 
-import java.io.File;
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sourceforge.schemaspy.model.Database;
-import net.sourceforge.schemaspy.model.Table;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import freemarker.template.TemplateException;
-
-import static org.junit.Assert.assertEquals;
+import net.sourceforge.schemaspy.model.Database;
+import net.sourceforge.schemaspy.model.Table;
 
 public class HtmlMainIndexPageTest {
 
