@@ -161,7 +161,7 @@
 		<pre>${table.viewSqlFormated}</pre>
 	</div>
 </#if>
-<#if (table.maxChildren + table.maxParents) > 0 >
+<#if (table.maxChildren + table.maxParents) gt 0 >
 <table width='100%' border='0'>
 	<tr>
 		<td class='container'>
