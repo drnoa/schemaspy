@@ -20,12 +20,10 @@ package net.sourceforge.schemaspy.view;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import java.util.TreeSet;
+
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Routine;
-import net.sourceforge.schemaspy.model.RoutineParameter;
 import net.sourceforge.schemaspy.util.LineWriter;
 
 /**
@@ -57,111 +55,29 @@ public class HtmlRoutinesPage extends HtmlFormatter {
     public void write(Database db, LineWriter html) throws IOException {
         Collection<Routine> routines = new TreeSet<Routine>(db.getRoutines());
 
-        writeHeader(db, routines, html);
-
-        for (Routine routine : routines) {
-            write(routine, html);
-        }
-
-        writeFooter(html);
-    }
-
-    private void writeHeader(Database db, Collection<Routine> routines, LineWriter html) throws IOException {
         GlobalData globalData = new GlobalData();
 		globalData.setDatabase(db);
-		
-		RoutinePageData data = new RoutinePageData();
+        
+        RoutinePageData data = new RoutinePageData();
         data.setGlobalData(globalData);
+        setNumberOfFuncsAndProcs(data, routines);
+        data.setRoutines(routines);
         
         html.writeln(templateService.renderTemplate("routines/routinesTemplate.ftl", data));
-
-        int numProcs = 0;
+    }
+    
+    private void setNumberOfFuncsAndProcs(RoutinePageData data, Collection<Routine> routines){
+    	int numProcs = 0;
         int numFuncs = 0;
 
         for (Routine routine : routines) {
-            String type = routine.getType().toLowerCase();
-            if (type.startsWith("proc"))
+            if (routine.isProcedur())
                 ++numProcs;
-            else if (type.startsWith("func"))
+            else if (routine.isProcedur())
                 ++numFuncs;
         }
-
-        html.write("   <br><b>");
-        html.write(db.getName());
-        if (db.getSchema() != null) {
-            html.write('.');
-            html.write(db.getSchema());
-        } else if (db.getCatalog() != null) {
-            html.write('.');
-            html.write(db.getCatalog());
-        }
-        html.write(" contains " + numProcs + " procedures and " + numFuncs + " functions:");
-        html.write("</b><br><div class='indent'>");
-
-        for (Routine routine : routines) {
-            html.write("<a href='#" + routine.getName() + "'>" + routine.getName() + "</a>&nbsp;&nbsp;");
-        }
-
-        html.writeln("</div>");
-        html.writeln("  </td>");
-        html.writeln(" </tr>");
-        html.writeln(" <tr><td colspan='3'>");
-    }
-
-    private void write(Routine routine, LineWriter html) throws IOException {
-        html.writeln("  <br><a id='" + routine.getName() + "'></a><hr>");
-        html.write("  <br><code><b>" + routine.getType() + " " + routine.getName());
-        html.write('(');
-        List<RoutineParameter> params = routine.getParameters();
-        Iterator<RoutineParameter> iter = params.iterator();
-        while (iter.hasNext()) {
-            RoutineParameter param = iter.next();
-            if (param.getMode() != null) {
-                html.write(param.getMode());
-                html.write(' ');
-            }
-            if (param.getName() != null) {
-                html.write(param.getName());
-                html.write(' ');
-            }
-            if (param.getType() != null) {
-                html.write(param.getType());
-            }
-            if (iter.hasNext())
-                html.write(", ");
-        }
-        html.write(") ");
-        if (routine.getReturnType() != null) {
-            html.write("RETURNS ");
-            html.writeln(routine.getReturnType());
-        }
-        html.writeln("</b><br>");
-        String indent = "   &nbsp;&nbsp;&nbsp;";
-        if (routine.getDefinitionLanguage() != null && routine.getDefinitionLanguage().length() > 0)
-            html.writeln(indent + "LANGUAGE " + routine.getDefinitionLanguage() + "<br>");
-        if (routine.getType().toLowerCase().startsWith("func")) {
-            // applies to return characteristics of functions only
-            html.write(indent);
-            if (!routine.isDeterministic())
-                html.write("NOT ");
-            html.writeln("DETERMINISTIC<br>");
-        }
-        if (routine.getDataAccess() != null && routine.getDataAccess().length() > 0)
-            html.writeln(indent + routine.getDataAccess() + "<br>");
-        if (routine.getSecurityType() != null && routine.getSecurityType().length() > 0)
-            html.writeln(indent + "SQL SECURITY " + routine.getSecurityType() + "<br>");
-        if (routine.getComment() != null && routine.getComment().length() > 0)
-            html.writeln(indent + "COMMENT '" + routine.getComment() + "'<br>");
-        html.writeln("</code><pre>");
-        html.writeln(routine.getDefinition());
-        html.writeln("</pre>");
-    }
-
-
-    @Override
-    protected void writeFooter(LineWriter html) throws IOException {
-        html.writeln("</td></tr></table>");
-        super.writeFooter(html);
+        data.setNumProcs(numProcs);
+        data.setNumFuncs(numFuncs);
     }
 
     @Override

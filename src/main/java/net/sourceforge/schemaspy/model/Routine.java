@@ -160,4 +160,11 @@ public class Routine implements Comparable<Routine> {
             rc = getDefinition().compareTo(other.getDefinition());
         return rc;
     }
+    
+    public boolean isFunction(){
+    	return type != null && type.toLowerCase().startsWith("func");
+    }
+    public boolean isProcedur(){
+    	return type != null && type.toLowerCase().startsWith("proc");
+    }
 }
