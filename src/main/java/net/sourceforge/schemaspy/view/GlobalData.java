@@ -8,7 +8,10 @@ public class GlobalData {
 	
 	private Config config = Config.getInstance();
 	private Database database;
-	private boolean displayNumRows;
+	private boolean displayNumRows = Config.getInstance().isNumRowsEnabled();
+	private boolean encodeComments = Config.getInstance().isEncodeCommentsEnabled();
+    private boolean isMetered = Config.getInstance().isMeterEnabled();
+	
 	private boolean sourceForgeLogoEnabled = Config.getInstance().isLogoEnabled();
 	private Revision schemaspyRevision = new Revision();
 
@@ -46,5 +49,21 @@ public class GlobalData {
 
 	public void setSchemaspyRevision(Revision schemaspyRevision) {
 		this.schemaspyRevision = schemaspyRevision;
+	}
+
+	public boolean isEncodeComments() {
+		return encodeComments;
+	}
+
+	public void setEncodeComments(boolean encodeComments) {
+		this.encodeComments = encodeComments;
+	}
+
+	public boolean isMetered() {
+		return isMetered;
+	}
+
+	public void setMetered(boolean isMetered) {
+		this.isMetered = isMetered;
 	}
 }
