@@ -20,22 +20,16 @@ package net.sourceforge.schemaspy;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.Reader;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import net.sourceforge.schemaspy.model.ProcessExecutionException;
+
 import net.sourceforge.schemaspy.util.LineWriter;
 import net.sourceforge.schemaspy.view.HtmlMultipleSchemasIndexPage;
 
@@ -54,44 +48,21 @@ public final class MultipleSchemaAnalyzer {
         return instance;
     }
 
+    /**
+     * @param dbName
+     * @param meta
+     * @param schemaSpec
+     * @param schemas
+     * @param argsOrg
+     * @param config
+     * @throws SQLException
+     * @throws IOException
+     */
     public void analyze(String dbName, DatabaseMetaData meta, String schemaSpec, List<String> schemas,
-            List<String> args, Config config) throws SQLException, IOException {
+            List<String> argsOrg, Config config) throws SQLException, IOException {
         long start = System.currentTimeMillis();
-        String loadedFrom = Config.getLoadedFromJar();
         File outputDir = config.getOutputDir();
-
-        List<String> genericCommand = new ArrayList<String>();
-        genericCommand.add("java");
-        genericCommand.add("-Doneofmultipleschemas=true");
-        if (new File(loadedFrom).isDirectory()) {
-            genericCommand.add("-cp");
-            genericCommand.add(loadedFrom);
-            genericCommand.add(Main.class.getName());
-        } else {
-            genericCommand.add("-jar");
-            genericCommand.add(loadedFrom);
-        }
-
-        args = new ArrayList<String>(args); // rude to modify caller's params, so make a copy
-
-        args.remove("-all");
-        SchemaAnalyzer.yankParam(args, "-o");
-        SchemaAnalyzer.yankParam(args, "-s");
-
-        // these are passed through environment variables
-        SchemaAnalyzer.yankParam(args, "-p");
-        SchemaAnalyzer.yankParam(args, "-i");
-        SchemaAnalyzer.yankParam(args, "-I");
-        SchemaAnalyzer.yankParam(args, "-x");
-        SchemaAnalyzer.yankParam(args, "-X");
-
-        for (String next : args) {
-            if (next.startsWith("-"))
-                genericCommand.add(next);
-            else
-                genericCommand.add("\"" + next + "\"");
-        }
-
+        
         List<String> populatedSchemas;
         if (schemas == null) {
             System.out.println("Analyzing schemas that match regular expression '" + schemaSpec + "':");
@@ -112,52 +83,31 @@ public final class MultipleSchemaAnalyzer {
 
         writeIndexPage(dbName, populatedSchemas, meta, outputDir, config.getCharset());
 
-        Map<String, String> env = System.getenv();
-        List<String> childEnv = new ArrayList<String>();
-        for (Entry<String, String> entry : env.entrySet()) {
-            childEnv.add(entry.getKey() + '=' + entry.getValue());
-        }
+        // prepare General Arguments
+        List<String>generalArgs = new ArrayList<String>(argsOrg); // rude to modify caller's params, so make a copy
 
-        // safer to pass password in environment so it can't be directly seen in cmd line
-        childEnv.add("schemaspy.pw=" + config.getPassword());
-
-        // some shells expand these regular expressions, so attempt to preserve them
-        // by passing in the environment
-        childEnv.add("schemaspy.tableInclusions=" + config.getTableInclusions());
-        childEnv.add("schemaspy.tableExclusions=" + config.getTableExclusions());
-        childEnv.add("schemaspy.columnExclusions=" + config.getColumnExclusions());
-        childEnv.add("schemaspy.indirectColumnExclusions=" + config.getIndirectColumnExclusions());
+        generalArgs.remove("-all");
+        SchemaAnalyzer.yankParam(generalArgs, "-o");
+        SchemaAnalyzer.yankParam(generalArgs, "-s");
 
         for (String schema : populatedSchemas) {
-            List<String> command = new ArrayList<String>(genericCommand);
+            List<String> arguments = new ArrayList<String>(generalArgs);
             // if no database was specified then we're dealing with a database
             // that treats a schema as the database
             if (dbName == null)
-                command.add("-db");
+                arguments.add("-db");
             else
-                command.add("-s");
-            command.add(schema);
-            command.add("-o");
-            command.add(new File(outputDir, schema).toString());
+                arguments.add("-s");
+            arguments.add(schema);
+            arguments.add("-o");
+            arguments.add(new File(outputDir, schema).toString());
             System.out.println("Analyzing " + schema);
             System.out.flush();
-            logger.fine("Analyzing schema with: " + command);
-            Process java = Runtime.getRuntime().exec(command.toArray(new String[]{}), childEnv.toArray(new String[]{}));
-            new ProcessOutputReader(java.getInputStream(), System.out).start();
-            new ProcessOutputReader(java.getErrorStream(), System.err).start();
+            logger.fine("Analyzing schema with: " + arguments);
 
-            try {
-                int rc = java.waitFor();
-                if (rc != 0) {
-                    StringBuilder err = new StringBuilder("Failed to execute this process (rc " + rc + "):");
-                    for (String chunk : command) {
-                        err.append(" ");
-                        err.append(chunk);
-                    }
-                    throw new ProcessExecutionException(err.toString());
-                }
-            } catch (InterruptedException exc) {
-            }
+			SchemaAnalyzer analyzer = new SchemaAnalyzer();
+			String[] argsSchema = new String[arguments.size()];
+            analyzer.analyze(new Config(arguments.toArray(argsSchema)));
         }
 
         long end = System.currentTimeMillis();
@@ -207,35 +157,5 @@ public final class MultipleSchemaAnalyzer {
         }
 
         return populatedSchemas;
-    }
-
-    private static class ProcessOutputReader extends Thread {
-        private final Reader processReader;
-        private final PrintStream out;
-
-        ProcessOutputReader(InputStream processStream, PrintStream out) {
-            processReader = new InputStreamReader(processStream);
-            this.out = out;
-            setDaemon(true);
-        }
-
-        @Override
-        public void run() {
-            try {
-                int ch;
-                while ((ch = processReader.read()) != -1) {
-                    out.print((char)ch);
-                    out.flush();
-                }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            } finally {
-                try {
-                    processReader.close();
-                } catch (Exception exc) {
-                    exc.printStackTrace(); // shouldn't ever get here...but...
-                }
-            }
-        }
     }
 }

@@ -60,7 +60,7 @@ public class IntegrationTest {
         argv[8] = "-p";
         argv[9] = "";
         argv[10] = "-o";
-        argv[11] = "./target/output";
+        argv[11] = GENERATED_RESULT_BASE_FILE_PATH;
         argv[12] = "-meta";
         argv[13] = "./src/test/resources/test.meta.xml";
 
