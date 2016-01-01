@@ -25,7 +25,7 @@ import net.sourceforge.schemaspy.SchemaAnalyzer;
 public class MultipleSchemataIntegrationTest {
 
     private static final String GENERATED_RESULT_BASE_FILE_PATH = "./target/outputMultiple";
-    private static final String EXPECTED_RESULT_BASE_FILE_PATH = "./src/test/resources/integrationtest/expectedResultMultiple";
+    private static final String EXPECTED_RESULT_BASE_FILE_PATH = "./src/test/resources/integrationtest/multipleSchemata/expectedResult";
 
 
     @Before
@@ -63,7 +63,7 @@ public class MultipleSchemataIntegrationTest {
         argv[10] = "-o";
         argv[11] = GENERATED_RESULT_BASE_FILE_PATH;
         argv[12] = "-meta";
-        argv[13] = "./src/test/resources/test.meta.xml";
+        argv[13] = "./src/test/resources/integrationtest/multipleSchemata/meta";
         argv[14] = "-schemas";
         argv[15] = "PUBLIC,SECONDSCHEMA";
 
@@ -73,8 +73,8 @@ public class MultipleSchemataIntegrationTest {
         // then
         assertFile("PUBLIC/deletionOrder.txt");
         assertFile("PUBLIC/insertionOrder.txt");
-        assertFile("secondSchema/deletionOrder.txt");
-        assertFile("secondSchema/insertionOrder.txt");
+        assertFile("SECONDSCHEMA/deletionOrder.txt");
+        assertFile("SECONDSCHEMA/insertionOrder.txt");
     }
 
     private void assertFile(String file) throws IOException {
