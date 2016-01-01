@@ -54,14 +54,14 @@ public final class MultipleSchemaAnalyzer {
      * @param schemaSpec
      * @param schemas
      * @param argsOrg
-     * @param config
+     * @param mainConfig
      * @throws SQLException
      * @throws IOException
      */
     public void analyze(String dbName, DatabaseMetaData meta, String schemaSpec, List<String> schemas,
-            List<String> argsOrg, Config config) throws SQLException, IOException {
+            List<String> argsOrg, Config mainConfig) throws SQLException, IOException {
         long start = System.currentTimeMillis();
-        File outputDir = config.getOutputDir();
+        File outputDir = mainConfig.getOutputDir();
         
         List<String> populatedSchemas;
         if (schemas == null) {
@@ -71,7 +71,7 @@ public final class MultipleSchemaAnalyzer {
             if (populatedSchemas.isEmpty())
                 populatedSchemas = getPopulatedSchemas(meta, schemaSpec, true);
             if (populatedSchemas.isEmpty())
-                populatedSchemas = Arrays.asList(new String[] {config.getUser()});
+                populatedSchemas = Arrays.asList(new String[] {mainConfig.getUser()});
         } else {
             System.out.println("Analyzing schemas:");
             populatedSchemas = schemas;
@@ -81,7 +81,7 @@ public final class MultipleSchemaAnalyzer {
             System.out.print(" " + populatedSchema);
         System.out.println();
 
-        writeIndexPage(dbName, populatedSchemas, meta, outputDir, config.getCharset());
+        writeIndexPage(dbName, populatedSchemas, meta, outputDir, mainConfig.getCharset());
 
         // prepare General Arguments
         List<String>generalArgs = new ArrayList<String>(argsOrg); // rude to modify caller's params, so make a copy
@@ -107,7 +107,9 @@ public final class MultipleSchemaAnalyzer {
 
 			SchemaAnalyzer analyzer = new SchemaAnalyzer();
 			String[] argsSchema = new String[arguments.size()];
-            analyzer.analyze(new Config(arguments.toArray(argsSchema)));
+			Config config = new Config(arguments.toArray(argsSchema));
+			config.setOneOfMultipleSchemas(true);
+            analyzer.analyze(config);
         }
 
         long end = System.currentTimeMillis();

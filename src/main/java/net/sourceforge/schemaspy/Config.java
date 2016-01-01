@@ -116,6 +116,7 @@ public class Config
     private Boolean evaluteAll;
     private Boolean highQuality;
     private Boolean lowQuality;
+    private boolean oneOfMultipleSchemas;
     private String schemaSpec;  // used in conjunction with evaluateAll
     private boolean hasOrphans = false;
     private boolean hasRoutines = false;
@@ -1129,8 +1130,10 @@ public class Config
      * @return boolean
      */
     public boolean isOneOfMultipleSchemas() {
-        // set by MultipleSchemaAnalyzer
-        return Boolean.getBoolean("oneofmultipleschemas");
+        return oneOfMultipleSchemas;
+    }
+    public void setOneOfMultipleSchemas(boolean oneOfMultipleSchemas){
+    	this.oneOfMultipleSchemas = oneOfMultipleSchemas;
     }
 
     /**
