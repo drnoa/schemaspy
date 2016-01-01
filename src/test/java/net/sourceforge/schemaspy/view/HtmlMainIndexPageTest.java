@@ -54,7 +54,7 @@ public class HtmlMainIndexPageTest {
 		
 		// when
 		String result = instance.writeTables(data);
-
+		
 		//then
 		String expected = readFile("src/test/resources/templates/testtemplates/expectedresults/MainIndexResult1.html");
 		assertEquals(expected, result);
