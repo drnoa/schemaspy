@@ -20,16 +20,16 @@
 <#if globalData.config.oneOfMultipleSchemas>
       <li><a href='/index.html' title='All Schemas Evaluated'>Schemas</a></li>
 </#if>
-  <li <#if 'index' == currentPageName>id='current'</#if>><a href='index.html' title='All tables and views in the schema'>Tables</a></li>
-  <li <#if 'relationships' == currentPageName>id='current'</#if>><a href='relationships.html' title='Diagram of table relationships'>Relationships</a></li>
+  <li <#if 'index' == currentPageName>id='current'</#if>><a href='${path}index.html' title='All tables and views in the schema'>Tables</a></li>
+  <li <#if 'relationships' == currentPageName>id='current'</#if>><a href='${path}relationships.html' title='Diagram of table relationships'>Relationships</a></li>
 <#if globalData.config.hasOrphans()>
-      <li <#if 'utilities' == currentPageName>id='current'</#if>><a href='utilities.html' title='View of tables with neither parents nor children'>Utility&nbsp;Tables</a></li>
+      <li <#if 'utilities' == currentPageName>id='current'</#if>><a href='${path}utilities.html' title='View of tables with neither parents nor children'>Utility&nbsp;Tables</a></li>
 </#if>
-  <li <#if 'constraints' == currentPageName>id='current'</#if>><a href='constraints.html' title='Useful for diagnosing error messages that just give constraint name or number'>Constraints</a></li>
-  <li <#if 'anomalies' == currentPageName>id='current'</#if>><a href='anomalies.html' title="Things that might not be quite right">Anomalies</a></li>
-  <li <#if 'columns' == currentPageName>id='current'</#if>><a href='columns.byColumns.html' title="All of the columns in the schema">Columns</a></li>
+  <li <#if 'constraints' == currentPageName>id='current'</#if>><a href='${path}constraints.html' title='Useful for diagnosing error messages that just give constraint name or number'>Constraints</a></li>
+  <li <#if 'anomalies' == currentPageName>id='current'</#if>><a href='${path}anomalies.html' title="Things that might not be quite right">Anomalies</a></li>
+  <li <#if 'columns' == currentPageName>id='current'</#if>><a href='${path}columns.byColumn.html' title="All of the columns in the schema">Columns</a></li>
 <#if globalData.config.hasRoutines()>
-      <li <#if 'routines' == currentPageName>id='current'</#if>><a href='routines.html' title='Stored Procedures / Functions'>Routines</a></li>
+      <li <#if 'routines' == currentPageName>id='current'</#if>><a href='${path}routines.html' title='Stored Procedures / Functions'>Routines</a></li>
 </#if>
   <li><a href='http://sourceforge.net/donate/index.php?group_id=137197' title='Please help keep SchemaSpy alive' target='_blank'>Donate</a></li>
  </ul>
