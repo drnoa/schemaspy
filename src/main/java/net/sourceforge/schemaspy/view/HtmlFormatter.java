@@ -18,7 +18,6 @@
  */
 package net.sourceforge.schemaspy.view;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.logging.Logger;
@@ -26,23 +25,14 @@ import java.util.logging.Logger;
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
-import net.sourceforge.schemaspy.util.LineWriter;
 
 public class HtmlFormatter {
     protected final boolean encodeComments = Config.getInstance().isEncodeCommentsEnabled();
-    private   final boolean isMetered = Config.getInstance().isMeterEnabled();
     protected final boolean displayNumRows = Config.getInstance().isNumRowsEnabled();
 
     protected HtmlFormatter() {
     }
 
-
-    protected void writeGeneratedOn(String connectTime, LineWriter html) throws IOException {
-        html.write("<span class='container'>");
-        html.write("Generated on ");
-        html.write(connectTime);
-        html.writeln("</span>");
-    }
 
     public static String getDescription(Database db, Table table, String text, boolean hoverHelp) {
         StringBuilder description = new StringBuilder();
@@ -95,28 +85,6 @@ public class HtmlFormatter {
         }
 
         return description.toString();
-    }
-
-    protected boolean sourceForgeLogoEnabled() {
-        return Config.getInstance().isLogoEnabled();
-    }
-
-    protected void writeFooter(LineWriter html) throws IOException {
-        html.writeln("</div>");
-        if (isMetered) {
-            html.writeln("<span style='float: right;' title='This link is only on the SchemaSpy sample pages'>");
-            html.writeln("<!-- Site Meter -->");
-            html.writeln("<script type='text/javascript' src='http://s28.sitemeter.com/js/counter.js?site=s28schemaspy'>");
-            html.writeln("</script>");
-            html.writeln("<noscript>");
-            html.writeln("<a href='http://s28.sitemeter.com/stats.asp?site=s28schemaspy' target='_top'>");
-            html.writeln("<img src='http://s28.sitemeter.com/meter.asp?site=s28schemaspy' alt='Site Meter' border='0'/></a>");
-            html.writeln("</noscript>");
-            html.writeln("<!-- Copyright (c)2006 Site Meter -->");
-            html.writeln("</span>");
-        }
-        html.writeln("</body>");
-        html.writeln("</html>");
     }
 
     /**

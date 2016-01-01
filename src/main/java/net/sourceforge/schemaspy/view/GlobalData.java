@@ -66,4 +66,5 @@ public class GlobalData {
 	public void setMetered(boolean isMetered) {
 		this.isMetered = isMetered;
 	}
+
 }

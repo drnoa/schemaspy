@@ -5,6 +5,10 @@
 <#if 'table' == currentPageName>
 <#assign path='../'>
 </#if>
+<#if additionalAssetPath??>
+<#assign path=path+additionalAssetPath>
+</#if>
+
 <!-- SchemaSpy rev ${globalData.schemaspyRevision} -->
 <title>SchemaSpy - ${descriptionHeader}</title>
 <link rel=stylesheet href='${path}schemaSpy.css' type='text/css'>
@@ -17,19 +21,23 @@
 <table id='headerHolder' cellspacing='0' cellpadding='0'><tr><td>
 <div id='header'>
  <ul>
-<#if globalData.config.oneOfMultipleSchemas>
-      <li><a href='/index.html' title='All Schemas Evaluated'>Schemas</a></li>
-</#if>
-  <li <#if 'index' == currentPageName>id='current'</#if>><a href='${path}index.html' title='All tables and views in the schema'>Tables</a></li>
-  <li <#if 'relationships' == currentPageName>id='current'</#if>><a href='${path}relationships.html' title='Diagram of table relationships'>Relationships</a></li>
-<#if globalData.config.hasOrphans()>
-      <li <#if 'utilities' == currentPageName>id='current'</#if>><a href='${path}utilities.html' title='View of tables with neither parents nor children'>Utility&nbsp;Tables</a></li>
-</#if>
-  <li <#if 'constraints' == currentPageName>id='current'</#if>><a href='${path}constraints.html' title='Useful for diagnosing error messages that just give constraint name or number'>Constraints</a></li>
-  <li <#if 'anomalies' == currentPageName>id='current'</#if>><a href='${path}anomalies.html' title="Things that might not be quite right">Anomalies</a></li>
-  <li <#if 'columns' == currentPageName>id='current'</#if>><a href='${path}columns.byColumn.html' title="All of the columns in the schema">Columns</a></li>
-<#if globalData.config.hasRoutines()>
-      <li <#if 'routines' == currentPageName>id='current'</#if>><a href='${path}routines.html' title='Stored Procedures / Functions'>Routines</a></li>
+<#if 'multipleSchemasIndex' == currentPageName>
+ <li id='current'><a href='index.html' title='All user schemas in the database'>Schemas</a></li>
+<#else>
+	<#if globalData.config.oneOfMultipleSchemas>
+	      <li><a href='${path}../index.html' title='All Schemas Evaluated'>Schemas</a></li>
+	</#if>
+	  <li <#if 'index' == currentPageName>id='current'</#if>><a href='${path}index.html' title='All tables and views in the schema'>Tables</a></li>
+	  <li <#if 'relationships' == currentPageName>id='current'</#if>><a href='${path}relationships.html' title='Diagram of table relationships'>Relationships</a></li>
+	<#if globalData.config.hasOrphans()>
+	      <li <#if 'utilities' == currentPageName>id='current'</#if>><a href='${path}utilities.html' title='View of tables with neither parents nor children'>Utility&nbsp;Tables</a></li>
+	</#if>
+	  <li <#if 'constraints' == currentPageName>id='current'</#if>><a href='${path}constraints.html' title='Useful for diagnosing error messages that just give constraint name or number'>Constraints</a></li>
+	  <li <#if 'anomalies' == currentPageName>id='current'</#if>><a href='${path}anomalies.html' title="Things that might not be quite right">Anomalies</a></li>
+	  <li <#if 'columns' == currentPageName>id='current'</#if>><a href='${path}columns.byColumn.html' title="All of the columns in the schema">Columns</a></li>
+	<#if globalData.config.hasRoutines()>
+	      <li <#if 'routines' == currentPageName>id='current'</#if>><a href='${path}routines.html' title='Stored Procedures / Functions'>Routines</a></li>
+	</#if>
 </#if>
   <li><a href='http://sourceforge.net/donate/index.php?group_id=137197' title='Please help keep SchemaSpy alive' target='_blank'>Donate</a></li>
  </ul>
@@ -46,7 +54,7 @@
         <#if !table?has_content>SchemaSpy Analysis of</#if>
         ${descriptionContent}
         </span>
-        <#if !table?has_content && globalData.database.description?has_content><span class='description'>${globalData.database.description}</span></#if>
+        <#if !table?has_content && globalData.database?has_content &&globalData.database.description?has_content><span class='description'>${globalData.database.description}</span></#if>
          <#if table?has_content && table.comments?has_content>
          	<div style='padding: 0px 4px;'>
          	${table.comments}
