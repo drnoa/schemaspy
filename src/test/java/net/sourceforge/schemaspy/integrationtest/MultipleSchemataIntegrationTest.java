@@ -15,7 +15,6 @@ import java.sql.Statement;
 
 import org.h2.tools.DeleteDbFiles;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import net.sourceforge.schemaspy.Config;
@@ -47,7 +46,6 @@ public class MultipleSchemataIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void test() throws IOException, SQLException {
         // given
         SchemaAnalyzer analyzer = new SchemaAnalyzer();
@@ -67,7 +65,7 @@ public class MultipleSchemataIntegrationTest {
         argv[12] = "-meta";
         argv[13] = "./src/test/resources/test.meta.xml";
         argv[14] = "-schemas";
-        argv[15] = "PUBLIC,secondSchema";
+        argv[15] = "PUBLIC,SECONDSCHEMA";
 
         // when
         analyzer.analyze(new Config(argv));

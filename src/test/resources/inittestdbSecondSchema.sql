@@ -1,6 +1,6 @@
 
-CREATE SCHEMA secondSchema;
-SET SCHEMA secondSchema;
+CREATE SCHEMA SECONDSCHEMA;
+SET SCHEMA SECONDSCHEMA;
 
 create table ADDRESS (
   addressId integer auto_increment,
