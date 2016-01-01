@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
 public class IntegrationTest {
 
     private static final String GENERATED_RESULT_BASE_FILE_PATH = "./target/output";
-    private static final String EXPECTED_RESULT_BASE_FILE_PATH = "./src/test/resources/integrationtest/expectedResult";
+    private static final String EXPECTED_RESULT_BASE_FILE_PATH = "./src/test/resources/integrationtest/singleSchema/expectedResult";
 
 
     @Before
@@ -60,9 +60,9 @@ public class IntegrationTest {
         argv[8] = "-p";
         argv[9] = "";
         argv[10] = "-o";
-        argv[11] = "./target/output";
+        argv[11] = GENERATED_RESULT_BASE_FILE_PATH;
         argv[12] = "-meta";
-        argv[13] = "./src/test/resources/test.meta.xml";
+        argv[13] = "./src/test/resources/integrationtest/singleSchema/test.meta.xml";
 
         // when
         Database result = analyzer.analyze(new Config(argv));
