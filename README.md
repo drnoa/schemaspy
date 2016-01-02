@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/drnoa/schemaspy.svg?branch=master)](https://travis-ci.org/drnoa/schemaspy)
+
 # Description
 SchemaSpy analyzes database metadata to reverse engineer dynamic Entity Relationship (ER) diagrams. It works with just about any JDBC-compliant database (Oracle/MySQL/DB2/SQL Server/PostgreSQL/Sybase/etc) and can identify Ruby on Rails relationships.
 
