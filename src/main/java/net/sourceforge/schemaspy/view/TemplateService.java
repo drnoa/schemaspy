@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -86,6 +87,7 @@ public class TemplateService {
 		Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 		cfg.setTemplateLoader(mtl);
 		cfg.setDefaultEncoding("UTF-8");
+		cfg.setLocale(Config.getInstance().getLocale());
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 		return cfg;
 	}

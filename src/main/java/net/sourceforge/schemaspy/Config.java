@@ -35,6 +35,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -48,6 +49,7 @@ import java.util.jar.JarInputStream;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 import net.sourceforge.schemaspy.model.InvalidConfigurationException;
 import net.sourceforge.schemaspy.util.DbSpecificConfig;
 import net.sourceforge.schemaspy.util.Dot;
@@ -127,6 +129,8 @@ public class Config
     private static final String DEFAULT_TABLE_INCLUSION = ".*"; // match everything
     private static final String DEFAULT_TABLE_EXCLUSION = "";   // match nothing
     private static final String DEFAULT_COLUMN_EXCLUSION = "[^.]";  // match nothing
+    // TODO: add param to set the locale from outside
+    private Locale locale = Locale.GERMAN;
 
     /**
      * Default constructor. Intended for when you want to inject properties
@@ -1712,7 +1716,15 @@ public class Config
         return null;
     }
 
-    /**
+    public Locale getLocale() {
+		return locale;
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
+
+	/**
      * Return all of the configuration options as a List of Strings, with
      * each parameter and its value as a separate element.
      *
