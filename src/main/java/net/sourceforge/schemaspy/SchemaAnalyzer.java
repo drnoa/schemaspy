@@ -104,389 +104,388 @@ public class SchemaAnalyzer {
     	// and not already logging fine details (to keep from obfuscating those)
         boolean render = config.isHtmlGenerationEnabled() && !fineEnabled;
         ProgressListener progressListener = new ConsoleProgressListener(render);
-
-        return analyze(config, progressListener);
-    }
-
-    public Database analyze(Config config, ProgressListener progressListener) throws SQLException, IOException {
-        try {
-            if (config.isHelpRequired()) {
-                config.dumpUsage(null, false);
-                return null;
-            }
-
-            if (config.isDbHelpRequired()) {
-                config.dumpUsage(null, true);
-                return null;
-            }
-
-            // set the log level for the root logger
-            Logger.getLogger("").setLevel(config.getLogLevel());
-
-            // clean-up console output a bit
-            for (Handler handler : Logger.getLogger("").getHandlers()) {
-                if (handler instanceof ConsoleHandler) {
-                    ((ConsoleHandler)handler).setFormatter(new LogFormatter());
-                    handler.setLevel(config.getLogLevel());
-                }
-            }
-
-            fineEnabled = logger.isLoggable(Level.FINE);
-            logger.info("Starting schema analysis");
-
-            File outputDir = config.getOutputDir();
-            if (!outputDir.isDirectory()) {
-                if (!outputDir.mkdirs()) {
-                    throw new IOException("Failed to create directory '" + outputDir + "'");
-                }
-            }
-
-            List<String> schemas = config.getSchemas();
-            if (schemas != null) {
-                List<String> args = config.asList();
-
-                // following params will be replaced by something appropriate
-                args.remove("-schemas");
-                args.remove("-schemata");
-
-                String dbName = config.getDb();
-
-                MultipleSchemaAnalyzer.getInstance().analyze(dbName, schemas, args, config);
-                return null;
-            }
-
-            Properties properties = config.determineDbProperties(config.getDbType());
-
-            ConnectionURLBuilder urlBuilder = new ConnectionURLBuilder(config, properties);
-            if (config.getDb() == null) {
-                config.setDb(urlBuilder.getConnectionURL());
-            }
-
-            if (config.getRemainingParameters().size() != 0) {
-                StringBuilder msg = new StringBuilder("Unrecognized option(s):");
-                for (String remnant : config.getRemainingParameters()) {
-                    msg.append(" " + remnant);
-                }
-                logger.warning(msg.toString());
-            }
-
-            String driverClass = properties.getProperty("driver");
-            String driverPath = properties.getProperty("driverPath");
-            if (driverPath == null) {
-                driverPath = "";
-            }
-            if (config.getDriverPath() != null) {
-                driverPath = config.getDriverPath() + File.pathSeparator + driverPath;
-            }
-
-            Connection connection = getConnection(config, urlBuilder.getConnectionURL(), driverClass, driverPath);
-
-            DatabaseMetaData meta = connection.getMetaData();
-            String dbName = config.getDb();
-            String schema = config.getSchema();
-
-            if (config.isEvaluateAllEnabled()) {
-                List<String> args = config.asList();
-                for (DbSpecificOption option : urlBuilder.getOptions()) {
-                    if (!args.contains("-" + option.getName())) {
-                        args.add("-" + option.getName());
-                        args.add(option.getValue().toString());
-                    }
-                }
-
-                String schemaSpec = config.getSchemaSpec();
-                if (schemaSpec == null) {
-                    schemaSpec = properties.getProperty("schemaSpec", ".*");
-                }
-                MultipleSchemaAnalyzer.getInstance().analyze(dbName, meta, schemaSpec, null, args, config);
-                return null;    // no database to return
-            }
-
-            String catalog = config.getCatalog();
-
-            logger.fine("supportsSchemasInTableDefinitions: " + meta.supportsSchemasInTableDefinitions());
-            logger.fine("supportsCatalogsInTableDefinitions: " + meta.supportsCatalogsInTableDefinitions());
-
-            if (schema == null && meta.supportsSchemasInTableDefinitions() &&
-                    !config.isSchemaDisabled()) {
-                schema = config.getUser();
-                logger.fine("schema not specified for a database that requires one.  using user: '" + schema + "'");
-                if (schema == null) {
-                    throw new InvalidConfigurationException("Either a schema ('-s') or a user ('-u') must be specified");
-                }
-                config.setSchema(schema);
-            }
-
-            if (catalog == null && schema == null &&
-                    meta.supportsCatalogsInTableDefinitions()) {
-                catalog = dbName;
-                logger.fine("catalog not specified for a database that requires one.  using dbName: '" + catalog + "'");
-                config.setCatalog(catalog);
-            }
-
-            SchemaMeta schemaMeta = config.getMeta() == null ? null : new SchemaMeta(config.getMeta(), dbName, schema);
-            if (config.isHtmlGenerationEnabled()) {
-                new File(outputDir, "tables").mkdirs();
-                new File(outputDir, "diagrams/summary").mkdirs();
-
-                logger.info("Connected to " + meta.getDatabaseProductName() + " - " + meta.getDatabaseProductVersion());
-
-                if (schemaMeta != null && schemaMeta.getFile() != null) {
-                    logger.info("Using additional metadata from " + schemaMeta.getFile());
-                }
-            }
-
-            //
-            // create our representation of the database
-            //
-            Database db = new Database(config, connection, meta, dbName, catalog, schema, schemaMeta, progressListener);
-
-            long duration = progressListener.startedGraphingSummaries();
-
-            schemaMeta = null; // done with it so let GC reclaim it
-
-            LineWriter out;
-            Collection<Table> tables = new ArrayList<Table>(db.getTables());
-            tables.addAll(db.getViews());
-
-            if (tables.isEmpty()) {
-                dumpNoTablesMessage(schema, config.getUser(), meta, config.getTableInclusions() != null);
-                if (!config.isOneOfMultipleSchemas()) {
-                    throw new EmptySchemaException();
-                }
-            }
-
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder;
-			try {
-				builder = factory.newDocumentBuilder();
-			} catch (ParserConfigurationException exc) {
-				throw new RuntimeException(exc);
-			}
-
-            Document document = builder.newDocument();
-            Element rootNode = document.createElement("database");
-            document.appendChild(rootNode);
-            DOMUtil.appendAttribute(rootNode, "name", dbName);
-            if (schema != null) {
-                DOMUtil.appendAttribute(rootNode, "schema", schema);
-            }
-            DOMUtil.appendAttribute(rootNode, "type", db.getDatabaseProduct());
-
-            if (config.isHtmlGenerationEnabled()) {
-                logger.info("Gathered schema details in " + duration / 1000 + " seconds");
-                logger.info("Writing/graphing summary");
-
-                ImageWriter.getInstance().writeImages(outputDir);
-                ResourceWriter.getInstance().writeResource("/jquery.js", new File(outputDir, "/jquery.js"));
-                ResourceWriter.getInstance().writeResource("/schemaSpy.js", new File(outputDir, "/schemaSpy.js"));
-                ResourceWriter.getInstance().writeResource("/jquery.tablesorter.js",
-                        new File(outputDir, "/jquery.tablesorter.js"));
-
-                progressListener.graphingSummaryProgressed();
-
-                boolean showDetailedTables = tables.size() <= config.getMaxDetailedTables();
-                final boolean includeImpliedConstraints = config.isImpliedConstraintsEnabled();
-
-                // if evaluating a 'ruby on rails-based' database then connect the columns
-                // based on RoR conventions
-                // note that this is done before 'hasRealRelationships' gets evaluated so
-                // we get a relationships ER diagram
-                if (config.isRailsEnabled()) {
-                    DbAnalyzer.getRailsConstraints(db.getTablesByName());
-                }
-
-                File summaryDir = new File(outputDir, "diagrams/summary");
-
-                // generate the compact form of the relationships .dot file
-                String dotBaseFilespec = "relationships";
-                out = new LineWriter(new File(summaryDir, dotBaseFilespec + ".real.compact.dot"), Config.DOT_CHARSET);
-                WriteStats stats = new WriteStats(tables);
-                DotFormatter.getInstance().writeRealRelationships(db, tables, true, showDetailedTables, stats, out);
-                boolean hasRealRelationships = stats.getNumTablesWritten() > 0 || stats.getNumViewsWritten() > 0;
-                out.close();
-
-                if (hasRealRelationships) {
-                    // real relationships exist so generate the 'big' form of the relationships .dot file
-                    progressListener.graphingSummaryProgressed();
-                    out = new LineWriter(new File(summaryDir, dotBaseFilespec + ".real.large.dot"), Config.DOT_CHARSET);
-                    DotFormatter.getInstance().writeRealRelationships(db, tables, false, showDetailedTables, stats, out);
-                    out.close();
-                }
-
-                // getting implied constraints has a side-effect of associating the parent/child tables, so don't do it
-                // here unless they want that behavior
-                List<ImpliedForeignKeyConstraint> impliedConstraints = null;
-                if (includeImpliedConstraints) {
-                    impliedConstraints = DbAnalyzer.getImpliedConstraints(tables);
-                } else {
-                    impliedConstraints = new ArrayList<ImpliedForeignKeyConstraint>();
-                }
-
-                List<Table> orphans = DbAnalyzer.getOrphans(tables);
-                config.setHasOrphans(!orphans.isEmpty() && Dot.getInstance().isValid());
-                config.setHasRoutines(!db.getRoutines().isEmpty());
-
-                progressListener.graphingSummaryProgressed();
-
-                File impliedDotFile = new File(summaryDir, dotBaseFilespec + ".implied.compact.dot");
-                out = new LineWriter(impliedDotFile, Config.DOT_CHARSET);
-                boolean hasImplied = DotFormatter.getInstance().writeAllRelationships(db, tables, true, showDetailedTables, stats, out);
-
-                Set<TableColumn> excludedColumns = stats.getExcludedColumns();
-                out.close();
-                if (hasImplied) {
-                    impliedDotFile = new File(summaryDir, dotBaseFilespec + ".implied.large.dot");
-                    out = new LineWriter(impliedDotFile, Config.DOT_CHARSET);
-                    DotFormatter.getInstance().writeAllRelationships(db, tables, false, showDetailedTables, stats, out);
-                    out.close();
-                } else {
-                    impliedDotFile.delete();
-                }
-
-                out = new LineWriter(new File(outputDir, dotBaseFilespec + ".html"), config.getCharset());
-                HtmlRelationshipsPage.getInstance().write(db, summaryDir, dotBaseFilespec, hasRealRelationships, hasImplied, excludedColumns,
-                											progressListener, out);
-                out.close();
-
-                progressListener.graphingSummaryProgressed();
-
-                dotBaseFilespec = "utilities";
-                File orphansDir = new File(outputDir, "diagrams/orphans");
-                orphansDir.mkdirs();
-                out = new LineWriter(new File(outputDir, dotBaseFilespec + ".html"), config.getCharset());
-                HtmlOrphansPage.getInstance().write(db, orphans, orphansDir, out);
-                orphans = null;
-                out.close();
-
-                progressListener.graphingSummaryProgressed();
-
-                out = new LineWriter(new File(outputDir, "index.html"), 64 * 1024, config.getCharset());
-                HtmlMainIndexPage.getInstance().write(db, tables, db.getRemoteTables(), out);
-                out.close();
-
-                progressListener.graphingSummaryProgressed();
-
-                List<ForeignKeyConstraint> constraints = DbAnalyzer.getForeignKeyConstraints(tables);
-                out = new LineWriter(new File(outputDir, "constraints.html"), 256 * 1024, config.getCharset());
-                HtmlConstraintsPage constraintIndexFormatter = HtmlConstraintsPage.getInstance();
-                constraintIndexFormatter.write(db, constraints, tables, out);
-                out.close();
-
-                progressListener.graphingSummaryProgressed();
-
-                out = new LineWriter(new File(outputDir, "anomalies.html"), 16 * 1024, config.getCharset());
-                HtmlAnomaliesPage.getInstance().write(db, tables, impliedConstraints, out);
-                out.close();
-
-                progressListener.graphingSummaryProgressed();
-                ColumnInfo columnInfo = HtmlColumnsPage.getInstance().getDefaultColumnInfo();
-                out = new LineWriter(new File(outputDir, columnInfo.getLocation()), 16 * 1024, config.getCharset());
-                HtmlColumnsPage.getInstance().write(db, tables, columnInfo, out);
-                out.close();
-                
-                progressListener.graphingSummaryProgressed();
-
-                out = new LineWriter(new File(outputDir, "routines.html"), 16 * 1024, config.getCharset());
-                HtmlRoutinesPage.getInstance().write(db, out);
-                out.close();
-
-                // create detailed diagrams
-
-                duration = progressListener.startedGraphingDetails();
-
-                logger.info("Completed summary in " + duration / 1000 + " seconds");
-                logger.info("Writing/diagramming details");
-
-                HtmlTablePage tableFormatter = HtmlTablePage.getInstance();
-                for (Table table : tables) {
-                	progressListener.graphingDetailsProgressed(table);
-                    if (fineEnabled) {
-                        logger.fine("Writing details of " + table.getName());
-                    }
-
-                    out = new LineWriter(new File(outputDir, "tables/" + table.getName() + ".html"), 24 * 1024, config.getCharset());
-                    tableFormatter.write(db, table, outputDir, stats, out);
-                    out.close();
-                }
-
-                out = new LineWriter(new File(outputDir, "schemaSpy.css"), config.getCharset());
-                StyleSheet.getInstance().write(out);
-                out.close();
-            }
-
-            XmlTableFormatter.getInstance().appendTables(rootNode, tables);
-
-            String xmlName = dbName;
-
-            // some dbNames have path info in the name...strip it
-            xmlName = new File(xmlName).getName();
-
-            // some dbNames include jdbc driver details including :'s and @'s
-            String[] unusables = xmlName.split("[:@]");
-            xmlName = unusables[unusables.length - 1];
-
-            if (schema != null) {
-                xmlName += '.' + schema;
-            }
-
-            out = new LineWriter(new File(outputDir, xmlName + ".xml"), Config.DOT_CHARSET);
-            document.getDocumentElement().normalize();
-            try {
-				DOMUtil.printDOM(document, out);
-			} catch (TransformerException exc) {
-				throw new IOException(exc);
-			}
-            out.close();
-
-            // 'try' to make some memory available for the sorting process
-            // (some people have run out of memory while RI sorting tables)
-            builder = null;
-            connection = null;
-            document = null;
-            factory = null;
-            meta = null;
-            properties = null;
-            rootNode = null;
-            urlBuilder = null;
-
-            List<ForeignKeyConstraint> recursiveConstraints = new ArrayList<ForeignKeyConstraint>();
-
-            // create an orderer to be able to determine insertion and deletion ordering of tables
-            TableOrderer orderer = new TableOrderer();
-
-            // side effect is that the RI relationships get trashed
-            // also populates the recursiveConstraints collection
-            List<Table> orderedTables = orderer.getTablesOrderedByRI(db.getTables(), recursiveConstraints);
-            Map<String, List<Table>> data = new HashMap<>();
-            data.put("tables", orderedTables);
-
-            out = new LineWriter(new File(outputDir, "insertionOrder.txt"), 16 * 1024, Config.DOT_CHARSET);
-            out.write(templateService.renderTemplate("general/insertionDeletionOrder.ftl", data));
-            out.close();
-
-            out = new LineWriter(new File(outputDir, "deletionOrder.txt"), 16 * 1024, Config.DOT_CHARSET);
-            Collections.reverse(orderedTables);
-            out.write(templateService.renderTemplate("general/insertionDeletionOrder.ftl", data));
-            out.close();
-
-            duration = progressListener.finishedGatheringDetails();
-            long overallDuration = progressListener.finished(tables, config);
-
-            if (config.isHtmlGenerationEnabled()) {
-                logger.info("Wrote table details in " + duration / 1000 + " seconds");
-
-                if (logger.isLoggable(Level.INFO)) {
-                    logger.info("Wrote relationship details of " + tables.size() + " tables/views to directory '" + config.getOutputDir() + "' in " + overallDuration / 1000 + " seconds.");
-                    logger.info("View the results by opening " + new File(config.getOutputDir(), "index.html"));
-                }
-            }
-
-            return db;
-        } catch (Config.MissingRequiredParameterException missingParam) {
+        try{
+        	return analyze(config, progressListener);
+        }catch (Config.MissingRequiredParameterException missingParam) {
             config.dumpUsage(missingParam.getMessage(), missingParam.isDbTypeSpecific());
             return null;
         }
+    }
+
+    private Database analyze(Config config, ProgressListener progressListener) throws SQLException, IOException {
+        if (config.isHelpRequired()) {
+            config.dumpUsage(null, false);
+            return null;
+        }
+
+        if (config.isDbHelpRequired()) {
+            config.dumpUsage(null, true);
+            return null;
+        }
+
+        // set the log level for the root logger
+        Logger.getLogger("").setLevel(config.getLogLevel());
+
+        // clean-up console output a bit
+        for (Handler handler : Logger.getLogger("").getHandlers()) {
+            if (handler instanceof ConsoleHandler) {
+                ((ConsoleHandler)handler).setFormatter(new LogFormatter());
+                handler.setLevel(config.getLogLevel());
+            }
+        }
+
+        fineEnabled = logger.isLoggable(Level.FINE);
+        logger.info("Starting schema analysis");
+
+        File outputDir = config.getOutputDir();
+        if (!outputDir.isDirectory()) {
+            if (!outputDir.mkdirs()) {
+                throw new IOException("Failed to create directory '" + outputDir + "'");
+            }
+        }
+
+        List<String> schemas = config.getSchemas();
+        if (schemas != null) {
+            List<String> args = config.asList();
+
+            // following params will be replaced by something appropriate
+            args.remove("-schemas");
+            args.remove("-schemata");
+
+            String dbName = config.getDb();
+
+            MultipleSchemaAnalyzer.getInstance().analyze(dbName, schemas, args, config);
+            return null;
+        }
+
+        Properties properties = config.determineDbProperties(config.getDbType());
+
+        ConnectionURLBuilder urlBuilder = new ConnectionURLBuilder(config, properties);
+        if (config.getDb() == null) {
+            config.setDb(urlBuilder.getConnectionURL());
+        }
+
+        if (config.getRemainingParameters().size() != 0) {
+            StringBuilder msg = new StringBuilder("Unrecognized option(s):");
+            for (String remnant : config.getRemainingParameters()) {
+                msg.append(" " + remnant);
+            }
+            logger.warning(msg.toString());
+        }
+
+        String driverClass = properties.getProperty("driver");
+        String driverPath = properties.getProperty("driverPath");
+        if (driverPath == null) {
+            driverPath = "";
+        }
+        if (config.getDriverPath() != null) {
+            driverPath = config.getDriverPath() + File.pathSeparator + driverPath;
+        }
+
+        Connection connection = getConnection(config, urlBuilder.getConnectionURL(), driverClass, driverPath);
+
+        DatabaseMetaData meta = connection.getMetaData();
+        String dbName = config.getDb();
+        String schema = config.getSchema();
+
+        if (config.isEvaluateAllEnabled()) {
+            List<String> args = config.asList();
+            for (DbSpecificOption option : urlBuilder.getOptions()) {
+                if (!args.contains("-" + option.getName())) {
+                    args.add("-" + option.getName());
+                    args.add(option.getValue().toString());
+                }
+            }
+
+            String schemaSpec = config.getSchemaSpec();
+            if (schemaSpec == null) {
+                schemaSpec = properties.getProperty("schemaSpec", ".*");
+            }
+            MultipleSchemaAnalyzer.getInstance().analyze(dbName, meta, schemaSpec, null, args, config);
+            return null;    // no database to return
+        }
+
+        String catalog = config.getCatalog();
+
+        logger.fine("supportsSchemasInTableDefinitions: " + meta.supportsSchemasInTableDefinitions());
+        logger.fine("supportsCatalogsInTableDefinitions: " + meta.supportsCatalogsInTableDefinitions());
+
+        if (schema == null && meta.supportsSchemasInTableDefinitions() &&
+                !config.isSchemaDisabled()) {
+            schema = config.getUser();
+            logger.fine("schema not specified for a database that requires one.  using user: '" + schema + "'");
+            if (schema == null) {
+                throw new InvalidConfigurationException("Either a schema ('-s') or a user ('-u') must be specified");
+            }
+            config.setSchema(schema);
+        }
+
+        if (catalog == null && schema == null &&
+                meta.supportsCatalogsInTableDefinitions()) {
+            catalog = dbName;
+            logger.fine("catalog not specified for a database that requires one.  using dbName: '" + catalog + "'");
+            config.setCatalog(catalog);
+        }
+
+        SchemaMeta schemaMeta = config.getMeta() == null ? null : new SchemaMeta(config.getMeta(), dbName, schema);
+        if (config.isHtmlGenerationEnabled()) {
+            new File(outputDir, "tables").mkdirs();
+            new File(outputDir, "diagrams/summary").mkdirs();
+
+            logger.info("Connected to " + meta.getDatabaseProductName() + " - " + meta.getDatabaseProductVersion());
+
+            if (schemaMeta != null && schemaMeta.getFile() != null) {
+                logger.info("Using additional metadata from " + schemaMeta.getFile());
+            }
+        }
+
+        //
+        // create our representation of the database
+        //
+        Database db = new Database(config, connection, meta, dbName, catalog, schema, schemaMeta, progressListener);
+
+        long duration = progressListener.startedGraphingSummaries();
+
+        schemaMeta = null; // done with it so let GC reclaim it
+
+        LineWriter out;
+        Collection<Table> tables = new ArrayList<Table>(db.getTables());
+        tables.addAll(db.getViews());
+
+        if (tables.isEmpty()) {
+            dumpNoTablesMessage(schema, config.getUser(), meta, config.getTableInclusions() != null);
+            if (!config.isOneOfMultipleSchemas()) {
+                throw new EmptySchemaException();
+            }
+        }
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder;
+		try {
+			builder = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException exc) {
+			throw new RuntimeException(exc);
+		}
+
+        Document document = builder.newDocument();
+        Element rootNode = document.createElement("database");
+        document.appendChild(rootNode);
+        DOMUtil.appendAttribute(rootNode, "name", dbName);
+        if (schema != null) {
+            DOMUtil.appendAttribute(rootNode, "schema", schema);
+        }
+        DOMUtil.appendAttribute(rootNode, "type", db.getDatabaseProduct());
+
+        if (config.isHtmlGenerationEnabled()) {
+            logger.info("Gathered schema details in " + duration / 1000 + " seconds");
+            logger.info("Writing/graphing summary");
+
+            ImageWriter.getInstance().writeImages(outputDir);
+            ResourceWriter.getInstance().writeResource("/jquery.js", new File(outputDir, "/jquery.js"));
+            ResourceWriter.getInstance().writeResource("/schemaSpy.js", new File(outputDir, "/schemaSpy.js"));
+            ResourceWriter.getInstance().writeResource("/jquery.tablesorter.js",
+                    new File(outputDir, "/jquery.tablesorter.js"));
+
+            progressListener.graphingSummaryProgressed();
+
+            boolean showDetailedTables = tables.size() <= config.getMaxDetailedTables();
+            final boolean includeImpliedConstraints = config.isImpliedConstraintsEnabled();
+
+            // if evaluating a 'ruby on rails-based' database then connect the columns
+            // based on RoR conventions
+            // note that this is done before 'hasRealRelationships' gets evaluated so
+            // we get a relationships ER diagram
+            if (config.isRailsEnabled()) {
+                DbAnalyzer.getRailsConstraints(db.getTablesByName());
+            }
+
+            File summaryDir = new File(outputDir, "diagrams/summary");
+
+            // generate the compact form of the relationships .dot file
+            String dotBaseFilespec = "relationships";
+            out = new LineWriter(new File(summaryDir, dotBaseFilespec + ".real.compact.dot"), Config.DOT_CHARSET);
+            WriteStats stats = new WriteStats(tables);
+            DotFormatter.getInstance().writeRealRelationships(db, tables, true, showDetailedTables, stats, out);
+            boolean hasRealRelationships = stats.getNumTablesWritten() > 0 || stats.getNumViewsWritten() > 0;
+            out.close();
+
+            if (hasRealRelationships) {
+                // real relationships exist so generate the 'big' form of the relationships .dot file
+                progressListener.graphingSummaryProgressed();
+                out = new LineWriter(new File(summaryDir, dotBaseFilespec + ".real.large.dot"), Config.DOT_CHARSET);
+                DotFormatter.getInstance().writeRealRelationships(db, tables, false, showDetailedTables, stats, out);
+                out.close();
+            }
+
+            // getting implied constraints has a side-effect of associating the parent/child tables, so don't do it
+            // here unless they want that behavior
+            List<ImpliedForeignKeyConstraint> impliedConstraints = null;
+            if (includeImpliedConstraints) {
+                impliedConstraints = DbAnalyzer.getImpliedConstraints(tables);
+            } else {
+                impliedConstraints = new ArrayList<ImpliedForeignKeyConstraint>();
+            }
+
+            List<Table> orphans = DbAnalyzer.getOrphans(tables);
+            config.setHasOrphans(!orphans.isEmpty() && Dot.getInstance().isValid());
+            config.setHasRoutines(!db.getRoutines().isEmpty());
+
+            progressListener.graphingSummaryProgressed();
+
+            File impliedDotFile = new File(summaryDir, dotBaseFilespec + ".implied.compact.dot");
+            out = new LineWriter(impliedDotFile, Config.DOT_CHARSET);
+            boolean hasImplied = DotFormatter.getInstance().writeAllRelationships(db, tables, true, showDetailedTables, stats, out);
+
+            Set<TableColumn> excludedColumns = stats.getExcludedColumns();
+            out.close();
+            if (hasImplied) {
+                impliedDotFile = new File(summaryDir, dotBaseFilespec + ".implied.large.dot");
+                out = new LineWriter(impliedDotFile, Config.DOT_CHARSET);
+                DotFormatter.getInstance().writeAllRelationships(db, tables, false, showDetailedTables, stats, out);
+                out.close();
+            } else {
+                impliedDotFile.delete();
+            }
+
+            out = new LineWriter(new File(outputDir, dotBaseFilespec + ".html"), config.getCharset());
+            HtmlRelationshipsPage.getInstance().write(db, summaryDir, dotBaseFilespec, hasRealRelationships, hasImplied, excludedColumns,
+            											progressListener, out);
+            out.close();
+
+            progressListener.graphingSummaryProgressed();
+
+            dotBaseFilespec = "utilities";
+            File orphansDir = new File(outputDir, "diagrams/orphans");
+            orphansDir.mkdirs();
+            out = new LineWriter(new File(outputDir, dotBaseFilespec + ".html"), config.getCharset());
+            HtmlOrphansPage.getInstance().write(db, orphans, orphansDir, out);
+            orphans = null;
+            out.close();
+
+            progressListener.graphingSummaryProgressed();
+
+            out = new LineWriter(new File(outputDir, "index.html"), 64 * 1024, config.getCharset());
+            HtmlMainIndexPage.getInstance().write(db, tables, db.getRemoteTables(), out);
+            out.close();
+
+            progressListener.graphingSummaryProgressed();
+
+            List<ForeignKeyConstraint> constraints = DbAnalyzer.getForeignKeyConstraints(tables);
+            out = new LineWriter(new File(outputDir, "constraints.html"), 256 * 1024, config.getCharset());
+            HtmlConstraintsPage constraintIndexFormatter = HtmlConstraintsPage.getInstance();
+            constraintIndexFormatter.write(db, constraints, tables, out);
+            out.close();
+
+            progressListener.graphingSummaryProgressed();
+
+            out = new LineWriter(new File(outputDir, "anomalies.html"), 16 * 1024, config.getCharset());
+            HtmlAnomaliesPage.getInstance().write(db, tables, impliedConstraints, out);
+            out.close();
+
+            progressListener.graphingSummaryProgressed();
+            ColumnInfo columnInfo = HtmlColumnsPage.getInstance().getDefaultColumnInfo();
+            out = new LineWriter(new File(outputDir, columnInfo.getLocation()), 16 * 1024, config.getCharset());
+            HtmlColumnsPage.getInstance().write(db, tables, columnInfo, out);
+            out.close();
+            
+            progressListener.graphingSummaryProgressed();
+
+            out = new LineWriter(new File(outputDir, "routines.html"), 16 * 1024, config.getCharset());
+            HtmlRoutinesPage.getInstance().write(db, out);
+            out.close();
+
+            // create detailed diagrams
+
+            duration = progressListener.startedGraphingDetails();
+
+            logger.info("Completed summary in " + duration / 1000 + " seconds");
+            logger.info("Writing/diagramming details");
+
+            HtmlTablePage tableFormatter = HtmlTablePage.getInstance();
+            for (Table table : tables) {
+            	progressListener.graphingDetailsProgressed(table);
+                if (fineEnabled) {
+                    logger.fine("Writing details of " + table.getName());
+                }
+
+                out = new LineWriter(new File(outputDir, "tables/" + table.getName() + ".html"), 24 * 1024, config.getCharset());
+                tableFormatter.write(db, table, outputDir, stats, out);
+                out.close();
+            }
+
+            out = new LineWriter(new File(outputDir, "schemaSpy.css"), config.getCharset());
+            StyleSheet.getInstance().write(out);
+            out.close();
+        }
+
+        XmlTableFormatter.getInstance().appendTables(rootNode, tables);
+
+        String xmlName = dbName;
+
+        // some dbNames have path info in the name...strip it
+        xmlName = new File(xmlName).getName();
+
+        // some dbNames include jdbc driver details including :'s and @'s
+        String[] unusables = xmlName.split("[:@]");
+        xmlName = unusables[unusables.length - 1];
+
+        if (schema != null) {
+            xmlName += '.' + schema;
+        }
+
+        out = new LineWriter(new File(outputDir, xmlName + ".xml"), Config.DOT_CHARSET);
+        document.getDocumentElement().normalize();
+        try {
+			DOMUtil.printDOM(document, out);
+		} catch (TransformerException exc) {
+			throw new IOException(exc);
+		}
+        out.close();
+
+        // 'try' to make some memory available for the sorting process
+        // (some people have run out of memory while RI sorting tables)
+        builder = null;
+        connection = null;
+        document = null;
+        factory = null;
+        meta = null;
+        properties = null;
+        rootNode = null;
+        urlBuilder = null;
+
+        List<ForeignKeyConstraint> recursiveConstraints = new ArrayList<ForeignKeyConstraint>();
+
+        // create an orderer to be able to determine insertion and deletion ordering of tables
+        TableOrderer orderer = new TableOrderer();
+
+        // side effect is that the RI relationships get trashed
+        // also populates the recursiveConstraints collection
+        List<Table> orderedTables = orderer.getTablesOrderedByRI(db.getTables(), recursiveConstraints);
+        Map<String, List<Table>> data = new HashMap<>();
+        data.put("tables", orderedTables);
+
+        out = new LineWriter(new File(outputDir, "insertionOrder.txt"), 16 * 1024, Config.DOT_CHARSET);
+        out.write(templateService.renderTemplate("general/insertionDeletionOrder.ftl", data));
+        out.close();
+
+        out = new LineWriter(new File(outputDir, "deletionOrder.txt"), 16 * 1024, Config.DOT_CHARSET);
+        Collections.reverse(orderedTables);
+        out.write(templateService.renderTemplate("general/insertionDeletionOrder.ftl", data));
+        out.close();
+
+        duration = progressListener.finishedGatheringDetails();
+        long overallDuration = progressListener.finished(tables, config);
+
+        if (config.isHtmlGenerationEnabled()) {
+            logger.info("Wrote table details in " + duration / 1000 + " seconds");
+
+            if (logger.isLoggable(Level.INFO)) {
+                logger.info("Wrote relationship details of " + tables.size() + " tables/views to directory '" + config.getOutputDir() + "' in " + overallDuration / 1000 + " seconds.");
+                logger.info("View the results by opening " + new File(config.getOutputDir(), "index.html"));
+            }
+        }
+
+        return db;
     }
 
     /**

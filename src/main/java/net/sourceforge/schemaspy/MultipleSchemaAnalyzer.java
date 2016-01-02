@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.util.LineWriter;
 import net.sourceforge.schemaspy.view.HtmlMultipleSchemasIndexPage;
 
@@ -109,7 +110,10 @@ public final class MultipleSchemaAnalyzer {
 			String[] argsSchema = new String[arguments.size()];
 			Config config = new Config(arguments.toArray(argsSchema));
 			config.setOneOfMultipleSchemas(true);
-            analyzer.analyze(config);
+            Database analyedDatabase = analyzer.analyze(config);
+            if(analyedDatabase == null){
+            	logger.warning("Error analysing Schema " + schema);
+            }
         }
 
         long end = System.currentTimeMillis();
