@@ -203,7 +203,7 @@ public class Dot {
      * @param renderer
      * @return
      */
-    public boolean supportsRenderer(@SuppressWarnings("hiding") String renderer) {
+    public boolean supportsRenderer(String renderer) {
         if (!exists())
             return false;
 

@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.sourceforge.schemaspy.Config;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
@@ -17,6 +15,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import net.sourceforge.schemaspy.Config;
 
 public class TemplateService {
 	private static final String TEMPLATES_PATH = "/templates";
