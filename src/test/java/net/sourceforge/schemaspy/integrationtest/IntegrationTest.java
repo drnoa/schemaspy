@@ -48,7 +48,7 @@ public class IntegrationTest {
     public void test() throws IOException, SQLException {
         // given
         SchemaAnalyzer analyzer = new SchemaAnalyzer();
-        String[] argv = new String[14];
+        String[] argv = new String[16];
         argv[0] = "-t";
         argv[1] = "h2";
         argv[2] = "-host";
@@ -63,6 +63,8 @@ public class IntegrationTest {
         argv[11] = GENERATED_RESULT_BASE_FILE_PATH;
         argv[12] = "-meta";
         argv[13] = "./src/test/resources/integrationtest/singleSchema/test.meta.xml";
+        argv[14] = "-locale";
+        argv[15] = "en_US";
 
         // when
         Database result = analyzer.analyze(new Config(argv));

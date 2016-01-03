@@ -129,8 +129,7 @@ public class Config
     private static final String DEFAULT_TABLE_INCLUSION = ".*"; // match everything
     private static final String DEFAULT_TABLE_EXCLUSION = "";   // match nothing
     private static final String DEFAULT_COLUMN_EXCLUSION = "[^.]";  // match nothing
-    // TODO: add param to set the locale from outside
-    private Locale locale = Locale.GERMAN;
+    private Locale locale;
 
     /**
      * Default constructor. Intended for when you want to inject properties
@@ -283,6 +282,20 @@ public class Config
         if (meta == null)
             meta = pullParam("-meta");
         return meta;
+    }
+    
+    public Locale getLocale() {
+    	if(locale == null){
+    		String localStr = pullParam("-locale");
+    		if(localStr != null){
+    			locale = Locale.forLanguageTag(localStr);
+    		}
+    		if(locale == null){
+    			locale = Locale.GERMAN;
+    		}
+    		
+    	}
+    	return locale;
     }
     
 
@@ -1715,14 +1728,6 @@ public class Config
 
         return null;
     }
-
-    public Locale getLocale() {
-		return locale;
-	}
-
-	public void setLocale(Locale locale) {
-		this.locale = locale;
-	}
 
 	/**
      * Return all of the configuration options as a List of Strings, with
