@@ -1,6 +1,6 @@
 <tr>
     <td class='detail' valign='top'>
-        <a href='tables/${table.name}.html'>${table.name}</a>
+        <a href='tables/${table.name?url}.html'>${table.name}</a>
     </td>
     <td class='detail' valign='top'>
         ${checkKey}

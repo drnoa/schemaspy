@@ -18,9 +18,9 @@
 				${relativeColumn.table.container}.${relativeColumn.table.name}
 			<#else>
 				<#if relativeColumn.table.remote>
-					<a href='${relativeColumn.table.container}/index.html'></a>.
+					<a href='${relativeColumn.table.container?url}/index.html'></a>.
 				</#if>
-				<a href='<#if relativeColumn.table.remote>../../${relativeColumn.table.container}/tables/</#if>.html'>${relativeColumn.table.name}</a>
+				<a href='<#if relativeColumn.table.remote>../../${relativeColumn.table.container?url}/tables/</#if>${relativeColumn.table.name?url}.html'>${relativeColumn.table.name}</a>
 			</#if>
 			<span class='relatedKey'>.${relativeColumn.name}</span>
 			</td>

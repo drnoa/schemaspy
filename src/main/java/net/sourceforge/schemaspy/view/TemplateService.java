@@ -85,7 +85,8 @@ public class TemplateService {
 
 		Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 		cfg.setTemplateLoader(mtl);
-		cfg.setDefaultEncoding("UTF-8");
+		cfg.setDefaultEncoding(Config.DOT_CHARSET);
+		cfg.setURLEscapingCharset(Config.DOT_CHARSET);
 		cfg.setLocale(Config.getInstance().getLocale());
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 		return cfg;

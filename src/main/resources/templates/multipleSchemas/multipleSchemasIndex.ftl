@@ -29,7 +29,7 @@
 <tbody>
 <#list populatedSchemas as schema>
 <tr>
-	<td class='detail'><a href='${schema}/index.html'>${schema}</a></td>
+	<td class='detail'><a href='${schema?url}/index.html'>${schema}</a></td>
 </tr>
 </#list>
 </tbody>

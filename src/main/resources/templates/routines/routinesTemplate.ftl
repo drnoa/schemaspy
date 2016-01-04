@@ -20,7 +20,7 @@
 	</b><br>
 	<div class='indent'>
 	<#list routines as routine>
-		<a href='#${routine.name}'>${routine.name}</a>&nbsp;&nbsp;
+		<a href='#${routine.name?url}'>${routine.name}</a>&nbsp;&nbsp;
 	</#list>
 	</div>
 	</td>

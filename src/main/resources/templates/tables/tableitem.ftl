@@ -6,7 +6,7 @@
 </#if>
 <#if showTableNameOnColumnTable>
 	<td class='detail'>
-		<a href='tables/${column.table.name}.html'>Table</a>
+		<a href='tables/${column.table.name?url}.html'>Table</a>
     </td>
 </#if>
 

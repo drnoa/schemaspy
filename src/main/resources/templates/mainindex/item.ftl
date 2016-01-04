@@ -8,10 +8,10 @@
 		${table.container}.${table.name}
 	<#else>
 		<#if table.remote>
-			<a href="../${table.container}/index.html">${table.container}</a>
-			<a href="../${table.container}/tables/${table.name}.html">${table.name}</a>
+			<a href="../${table.container?url}/index.html">${table.container}</a>
+			<a href="../${table.container?url}/tables/${table.name}.html">${table.name}</a>
 		<#else>
-			<a href="tables/${table.name}.html">${table.name}</a>
+			<a href="tables/${table.name?url}.html">${table.name}</a>
 		</#if>
 	</#if>
 </td>

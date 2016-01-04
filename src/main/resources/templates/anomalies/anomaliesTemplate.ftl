@@ -22,13 +22,13 @@
             <#list impliedConstraints as impliedConstraint>
             	<tr>
             		<td class='detail'>
-            			<a href='tables/${impliedConstraint.childTable.name}.html'>${impliedConstraint.childTable.name}</a>.
+            			<a href='tables/${impliedConstraint.childTable.name?url}.html'>${impliedConstraint.childTable.name}</a>.
             			<#list impliedConstraint.childColumns as childColumn>
             				${childColumn.name}<#if childColumn?has_next>, </#if>
             			</#list>
             		</td>
             		<td class='detail'>
-            			<a href='tables/${impliedConstraint.parentTable.name}.html'>${impliedConstraint.parentTable.name}</a>.
+            			<a href='tables/${impliedConstraint.parentTable.name?url}.html'>${impliedConstraint.parentTable.name}</a>.
             			<#list impliedConstraint.parentColumns as parentColumn>
             				${parentColumn.name}<#if parentColumn?has_next>, </#if>
             			</#list>
@@ -67,7 +67,7 @@
             <#list unindexedTables as unindexedTable>
             	<tr>
             		<td class='detail'>
-            			<a href='tables/${unindexedTable.name}.html'>${unindexedTable.name}</a>
+            			<a href='tables/${unindexedTable.name?url}.html'>${unindexedTable.name}</a>
                 	</td>
                 	<#if globalData.displayNumRows>
                 		<td class='detail' align='right'>
@@ -104,7 +104,7 @@
             <#list tablesWithOneColumn as tableWithOneColumn>
             <tr>
                 <td class='detail'>
-                	<a href='tables/${tableWithOneColumn.name}.html'>${tableWithOneColumn.name}</a>
+                	<a href='tables/${tableWithOneColumn.name?url}.html'>${tableWithOneColumn.name}</a>
                 </td>
                 <td class='detail'>
                 	<#list tableWithOneColumn.columns as column>
@@ -138,7 +138,7 @@
             <#list tablesWithIncrementingColumnNames as tablesWithIncrementingColumnName>
             <tr>
             	<td class='detail'>
-                	<a href='tables/${tablesWithIncrementingColumnName.name}.html'>${tablesWithIncrementingColumnName.name}</a>
+                	<a href='tables/${tablesWithIncrementingColumnName.name?url}.html'>${tablesWithIncrementingColumnName.name}</a>
                 </td>
             </tr>
             </#list>
@@ -167,7 +167,7 @@
             <#list defaultNullStringColumns as defaultNullStringColumn>
             <tr>
             	<td class='detail'>
-                	<a href='tables/${defaultNullStringColumn.table.name}.html'>${defaultNullStringColumn.table.name}</a>.${defaultNullStringColumn.name}
+                	<a href='tables/${defaultNullStringColumn.table.name?url}.html'>${defaultNullStringColumn.table.name}</a>.${defaultNullStringColumn.name}
                 </td>
             </tr>
             </#list>
