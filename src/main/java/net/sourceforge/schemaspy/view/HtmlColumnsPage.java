@@ -38,7 +38,7 @@ import net.sourceforge.schemaspy.util.LineWriter;
  *
  * @author John Currier
  */
-public class HtmlColumnsPage extends HtmlFormatter {
+public class HtmlColumnsPage {
     private static HtmlColumnsPage instance = new HtmlColumnsPage();
     private TemplateService templateService;
 

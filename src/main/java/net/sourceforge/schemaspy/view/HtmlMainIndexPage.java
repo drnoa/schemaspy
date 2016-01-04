@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.util.LineWriter;
@@ -32,7 +33,7 @@ import net.sourceforge.schemaspy.util.LineWriter;
  * 
  * @author John Currier
  */
-public class HtmlMainIndexPage extends HtmlFormatter {
+public class HtmlMainIndexPage {
 	private static HtmlMainIndexPage instance = new HtmlMainIndexPage();
 	
 	private TemplateService templateService;
@@ -94,7 +95,7 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 		
 		GlobalData globalData = new GlobalData();
 		globalData.setDatabase(database);
-		globalData.setDisplayNumRows(displayNumRows);
+		globalData.setDisplayNumRows(Config.getInstance().isNumRowsEnabled());
 		
 		MainIndexPageData data = new MainIndexPageData();
 		data.setGlobalData(globalData);

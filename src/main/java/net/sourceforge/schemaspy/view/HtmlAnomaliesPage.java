@@ -36,7 +36,7 @@ import net.sourceforge.schemaspy.util.LineWriter;
  *
  * @author John Currier
  */
-public class HtmlAnomaliesPage extends HtmlFormatter {
+public class HtmlAnomaliesPage {
     private static HtmlAnomaliesPage instance = new HtmlAnomaliesPage();
     
     private TemplateService templateService;

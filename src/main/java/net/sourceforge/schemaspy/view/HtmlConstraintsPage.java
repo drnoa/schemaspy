@@ -34,7 +34,7 @@ import net.sourceforge.schemaspy.util.LineWriter;
  *
  * @author John Currier
  */
-public class HtmlConstraintsPage extends HtmlFormatter {
+public class HtmlConstraintsPage {
     private static HtmlConstraintsPage instance = new HtmlConstraintsPage();
 
     private TemplateService templateService;

@@ -177,14 +177,14 @@
 				:</b></form>
 				
 				${oneDegreeDiagram}
-				<a name='diagram'><img id='oneDegreeImg' src='../diagrams/${oneDegreeDiagramName}' usemap='#oneDegreeRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a
+				<a name='diagram'><img id='oneDegreeImg' src='../diagrams/${oneDegreeDiagramName?url}' usemap='#oneDegreeRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a
 				<#if impliedDiagram?? && impliedDiagram?has_content>
 					${impliedDiagram}
-					<a name='diagram'><img id='impliedTwoDegreesImg' src='../diagrams/${impliedDiagramName}' usemap='#impliedTwoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>
+					<a name='diagram'><img id='impliedTwoDegreesImg' src='../diagrams/${impliedDiagramName?url}' usemap='#impliedTwoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>
 				</#if>
 				<#if twoDegreesDiagram?? && twoDegreesDiagram?has_content>
 					${twoDegreesDiagram}
-					<a name='diagram'><img id='twoDegreesImg' src='../diagrams/${twoDegreesDiagramName}' usemap='#twoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>
+					<a name='diagram'><img id='twoDegreesImg' src='../diagrams/${twoDegreesDiagramName?url}' usemap='#twoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>
 				</#if>
 			
 			<#assign columnsNotInDiagram=excludedColumns>

@@ -217,18 +217,18 @@ public class HtmlTablePage extends HtmlDiagramFormatter {
             File impliedDiagramFile = new File(diagramDir, table.getName() + ".implied2degrees." + dot.getFormat());
             
             data.oneDegreeDiagram = dot.generateDiagram(oneDegreeDotFile, oneDegreeDiagramFile);
-            data.oneDegreeDiagramName = urlEncode(oneDegreeDiagramFile.getName());
+            data.oneDegreeDiagramName = oneDegreeDiagramFile.getName();
 
             if (impliedDotFile.exists()) {
             	data.impliedDiagram = dot.generateDiagram(impliedDotFile, impliedDiagramFile);
-                data.impliedDiagramName = urlEncode(impliedDiagramFile.getName());
+                data.impliedDiagramName = impliedDiagramFile.getName();
             } else {
                 impliedDotFile.delete();
                 impliedDiagramFile.delete();
             }
             if (twoDegreesDotFile.exists()) {
             	data.twoDegreesDiagram = dot.generateDiagram(twoDegreesDotFile, twoDegreesDiagramFile);
-                data.twoDegreesDiagramName = urlEncode(twoDegreesDiagramFile.getName());
+                data.twoDegreesDiagramName = twoDegreesDiagramFile.getName();
             } else {
                 twoDegreesDotFile.delete();
                 twoDegreesDiagramFile.delete();

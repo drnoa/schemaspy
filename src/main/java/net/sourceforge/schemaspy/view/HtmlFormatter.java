@@ -18,21 +18,10 @@
  */
 package net.sourceforge.schemaspy.view;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.logging.Logger;
-
-import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Database;
 import net.sourceforge.schemaspy.model.Table;
 
 public class HtmlFormatter {
-    protected final boolean encodeComments = Config.getInstance().isEncodeCommentsEnabled();
-    protected final boolean displayNumRows = Config.getInstance().isNumRowsEnabled();
-
-    protected HtmlFormatter() {
-    }
-
 
     public static String getDescription(Database db, Table table, String text, boolean hoverHelp) {
         StringBuilder description = new StringBuilder();
@@ -85,21 +74,5 @@ public class HtmlFormatter {
         }
 
         return description.toString();
-    }
-
-    /**
-     * Encode the specified string
-     *
-     * @param string
-     * @return
-     */
-    static String urlEncode(String string) {
-        try {
-            return URLEncoder.encode(string, Config.DOT_CHARSET);
-        } catch (UnsupportedEncodingException e) {
-            Logger logger = Logger.getLogger(HtmlFormatter.class.getName());
-            logger.info("Error trying to urlEncode string [" + string + "] with encoding [" + Config.DOT_CHARSET + "]");
-            return string;
-        }
     }
 }

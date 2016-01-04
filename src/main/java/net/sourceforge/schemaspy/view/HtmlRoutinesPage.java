@@ -32,7 +32,7 @@ import net.sourceforge.schemaspy.util.LineWriter;
  *
  * @author John Currier
  */
-public class HtmlRoutinesPage extends HtmlFormatter {
+public class HtmlRoutinesPage {
     private static HtmlRoutinesPage instance = new HtmlRoutinesPage();
     private TemplateService templateService;
 

@@ -18,10 +18,14 @@
  */
 package net.sourceforge.schemaspy.view;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.Table;
 import net.sourceforge.schemaspy.model.TableColumn;
@@ -170,11 +174,27 @@ public class DotNode {
 
         buf.append("    </TABLE>>" + lineSeparator);
         if (!table.isRemote() || Config.getInstance().isOneOfMultipleSchemas())
-            buf.append("    URL=\"" + path + HtmlFormatter.urlEncode(tableName) + ".html\"" + lineSeparator);
-        buf.append("    tooltip=\"" + HtmlFormatter.urlEncode(fqTableName) + "\"" + lineSeparator);
+            buf.append("    URL=\"" + path + urlEncode(tableName) + ".html\"" + lineSeparator);
+        buf.append("    tooltip=\"" + urlEncode(fqTableName) + "\"" + lineSeparator);
         buf.append("  ];");
 
         return buf.toString();
+    }
+    
+    /**
+     * Encode the specified string
+     *
+     * @param string
+     * @return
+     */
+    private String urlEncode(String string) {
+        try {
+            return URLEncoder.encode(string, Config.DOT_CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            Logger logger = Logger.getLogger(HtmlFormatter.class.getName());
+            logger.info("Error trying to urlEncode string [" + string + "] with encoding [" + Config.DOT_CHARSET + "]");
+            return string;
+        }
     }
 
     public static class DotNodeConfig {

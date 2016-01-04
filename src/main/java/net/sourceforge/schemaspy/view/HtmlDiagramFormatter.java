@@ -20,7 +20,7 @@ package net.sourceforge.schemaspy.view;
 
 import net.sourceforge.schemaspy.util.Dot;
 
-public class HtmlDiagramFormatter extends HtmlFormatter {
+public class HtmlDiagramFormatter {
     private static boolean printedNoDotWarning = false;
     private static boolean printedInvalidVersionWarning = false;
 

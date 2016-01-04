@@ -30,7 +30,7 @@ import net.sourceforge.schemaspy.util.LineWriter;
  *
  * @author John Currier
  */
-public class HtmlMultipleSchemasIndexPage extends HtmlFormatter {
+public class HtmlMultipleSchemasIndexPage {
     private static HtmlMultipleSchemasIndexPage instance = new HtmlMultipleSchemasIndexPage();
     private TemplateService templateService;
 
