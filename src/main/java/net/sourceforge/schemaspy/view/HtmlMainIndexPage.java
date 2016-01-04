@@ -113,9 +113,4 @@ public class HtmlMainIndexPage extends HtmlFormatter {
 	protected String writeTables(MainIndexPageData data) throws IOException {
 		return templateService.renderTemplate("mainindex/localTablesTemplate.ftl", data);
 	}
-
-	@Override
-	protected boolean isMainIndex() {
-		return true;
-	}
 }

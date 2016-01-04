@@ -129,9 +129,4 @@ public class HtmlRelationshipsPage extends HtmlDiagramFormatter {
             return false;
         }
     }
-
-    @Override
-    protected boolean isRelationshipsPage() {
-        return true;
-    }
 }

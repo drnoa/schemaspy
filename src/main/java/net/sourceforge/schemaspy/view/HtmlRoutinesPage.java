@@ -79,9 +79,4 @@ public class HtmlRoutinesPage extends HtmlFormatter {
         data.setNumProcs(numProcs);
         data.setNumFuncs(numFuncs);
     }
-
-    @Override
-    protected boolean isRoutinesPage() {
-        return true;
-    }
 }

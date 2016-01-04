@@ -105,9 +105,4 @@ public class HtmlOrphansPage extends HtmlDiagramFormatter {
     protected String writeOrphans(OrphansPageData data) throws IOException {
         return templateService.renderTemplate("orphans/localOrphansTemplate.ftl", data);
     }
-
-    @Override
-    protected boolean isOrphansPage() {
-        return true;
-    }
 }

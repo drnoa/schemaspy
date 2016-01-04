@@ -69,9 +69,4 @@ public class HtmlConstraintsPage extends HtmlFormatter {
     protected String writeConstraints(ConstraintPageData data) throws IOException {
         return templateService.renderTemplate("constraints/localConstraintsTemplate.ftl", data);
     }
-
-    @Override
-    protected boolean isConstraintsPage() {
-        return true;
-    }
 }

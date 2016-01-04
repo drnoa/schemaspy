@@ -123,12 +123,6 @@ public class HtmlColumnsPage extends HtmlFormatter {
 		html.write(templateService.renderTemplate("columns/localColumnsTemplate.ftl", data));
     }
 
-
-    @Override
-    protected boolean isColumnsPage() {
-        return true;
-    }
-
     private class ByColumnComparator implements Comparator<TableColumn> {
         public int compare(TableColumn column1, TableColumn column2) {
             int rc = column1.getName().compareToIgnoreCase(column2.getName());

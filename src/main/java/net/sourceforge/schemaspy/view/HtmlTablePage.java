@@ -240,9 +240,4 @@ public class HtmlTablePage extends HtmlDiagramFormatter {
 
         return true;
     }
-
-    @Override
-    protected String getPathToRoot() {
-        return "../";
-    }
 }

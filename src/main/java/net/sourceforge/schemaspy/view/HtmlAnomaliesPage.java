@@ -78,9 +78,4 @@ public class HtmlAnomaliesPage extends HtmlFormatter {
 		data.setDefaultNullStringColumns(DbAnalyzer.getDefaultNullStringColumns(new HashSet<Table>(tables)));
     	html.write(templateService.renderTemplate("anomalies/anomaliesTemplate.ftl", data));
     }
-
-    @Override
-    protected boolean isAnomaliesPage() {
-        return true;
-    }
 }
