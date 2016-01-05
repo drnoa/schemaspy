@@ -78,7 +78,6 @@ import net.sourceforge.schemaspy.view.HtmlRelationshipsPage;
 import net.sourceforge.schemaspy.view.HtmlRoutinesPage;
 import net.sourceforge.schemaspy.view.HtmlTablePage;
 import net.sourceforge.schemaspy.view.ImageWriter;
-import net.sourceforge.schemaspy.view.StyleSheet;
 import net.sourceforge.schemaspy.view.TemplateService;
 import net.sourceforge.schemaspy.view.WriteStats;
 import net.sourceforge.schemaspy.view.XmlTableFormatter;
@@ -413,9 +412,7 @@ public class SchemaAnalyzer {
                 out.close();
             }
 
-            out = new LineWriter(new File(outputDir, "schemaSpy.css"), config.getCharset());
-            StyleSheet.getInstance().write(out);
-            out.close();
+            ResourceWriter.getInstance().writeResource("/schemaSpy.css", new File(outputDir, "/schemaSpy.css"));
         }
 
         XmlTableFormatter.getInstance().appendTables(rootNode, tables);

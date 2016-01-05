@@ -25,15 +25,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+
 import net.sourceforge.schemaspy.Config;
 import net.sourceforge.schemaspy.model.InvalidConfigurationException;
-import net.sourceforge.schemaspy.util.LineWriter;
 
 /**
  * Represents our CSS style sheet (CSS) with accessors for important
@@ -45,7 +43,6 @@ import net.sourceforge.schemaspy.util.LineWriter;
  */
 public class StyleSheet {
     private static StyleSheet instance;
-    private final String css;
     private String bodyBackgroundColor;
     private String tableHeadBackgroundColor;
     private String tableBackgroundColor;
@@ -55,10 +52,9 @@ public class StyleSheet {
     private String indexedColumnBackgroundColor;
     private String selectedTableBackgroundColor;
     private String excludedColumnBackgroundColor;
-    private final List<String> ids = new ArrayList<String>();
 
     private StyleSheet(BufferedReader cssReader) throws IOException {
-        String lineSeparator = System.getProperty("line.separator");
+    	String lineSeparator = System.getProperty("line.separator");
         StringBuilder data = new StringBuilder();
         String line;
 
@@ -67,22 +63,19 @@ public class StyleSheet {
             data.append(lineSeparator);
         }
 
-        css = data.toString();
-
         int startComment = data.indexOf("/*");
         while (startComment != -1) {
             int endComment = data.indexOf("*/");
             data.replace(startComment, endComment + 2, "");
             startComment = data.indexOf("/*");
         }
-
+        
         StringTokenizer tokenizer = new StringTokenizer(data.toString(), "{}");
         String id = null;
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken().trim();
             if (id == null) {
                 id = token.toLowerCase();
-                ids.add(id);
             } else {
                 Map<String, String> attribs = parseAttributes(token);
                 if (id.equals(".content"))
@@ -172,16 +165,6 @@ public class StyleSheet {
         }
 
         return attribs;
-    }
-
-    /**
-     * Write the contents of the original css to <code>out</code>.
-     *
-     * @param out
-     * @throws IOException
-     */
-    public void write(LineWriter out) throws IOException {
-        out.write(css);
     }
 
     public String getBodyBackground() {
